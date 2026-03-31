@@ -13,27 +13,13 @@ import {
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
 export default function Dashboard() {
-  const { data, isLoading, token } = useData()
+  const { data, isLoading } = useData()
   const { electricCharges, fuelRefuels } = data
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin text-blue-500" size={32} />
-      </div>
-    )
-  }
-
-  if (!token) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 max-w-sm">
-          <p className="font-semibold text-amber-800 mb-1">Token de GitHub no configurado</p>
-          <p className="text-sm text-amber-700 mb-4">Configura tu token para sincronizar datos con GitHub.</p>
-          <Link to="/configuracion" className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors">
-            Ir a Configuración <ChevronRight size={14} />
-          </Link>
-        </div>
       </div>
     )
   }

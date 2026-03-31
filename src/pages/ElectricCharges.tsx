@@ -10,7 +10,7 @@ import type { ToastData } from '../components/Toast'
 import { formatDate, formatCurrency, formatNumber } from '../utils/calculations'
 
 export default function ElectricCharges() {
-  const { data, addCharge, updateCharge, deleteCharge, isSyncing } = useData()
+  const { data, addCharge, updateCharge, deleteCharge } = useData()
   const charges = [...data.electricCharges].sort((a, b) => b.date.localeCompare(a.date))
 
   const [showForm, setShowForm] = useState(false)
@@ -169,7 +169,7 @@ export default function ElectricCharges() {
             initial={editing ?? undefined}
             onSubmit={editing ? handleUpdate : handleAdd}
             onCancel={() => { setShowForm(false); setEditing(null) }}
-            isSubmitting={submitting || isSyncing}
+            isSubmitting={submitting}
           />
         </Modal>
       )}

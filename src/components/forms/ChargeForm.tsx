@@ -116,7 +116,7 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
         <Field label="Precio total (€)" error={errors.totalPrice}>
           <input type="number" step="0.01" min="0" placeholder="e.g. 4.20" value={f.totalPrice} onChange={e => set('totalPrice', e.target.value)} className={input(errors.totalPrice)} />
         </Field>
-        <Field label="€/kWh (Wailet)" error={errors.pricePerKWh}>
+        <Field label="Monedero Waylet €" error={errors.pricePerKWh}>
           <input type="number" step="0.0001" min="0" placeholder="e.g. 0.27" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={input(errors.pricePerKWh)} />
         </Field>
         <Field label="Km al inicio (última carga)" error={errors.odometerStart}>

@@ -1,0 +1,20 @@
+Options -Indexes
+
+<Files "config.php">
+  Order deny,allow
+  Deny from all
+</Files>
+
+<Files "db.php">
+  Order deny,allow
+  Deny from all
+</Files>
+
+<Files "helpers.php">
+  Order deny,allow
+  Deny from all
+</Files>
+
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"

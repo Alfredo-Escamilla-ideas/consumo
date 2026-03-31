@@ -10,7 +10,7 @@ import type { ToastData } from '../components/Toast'
 import { formatDate, formatCurrency, formatNumber } from '../utils/calculations'
 
 export default function FuelRefuels() {
-  const { data, addRefuel, updateRefuel, deleteRefuel, isSyncing } = useData()
+  const { data, addRefuel, updateRefuel, deleteRefuel } = useData()
   const refuels = [...data.fuelRefuels].sort((a, b) => b.date.localeCompare(a.date))
   const sortedByOdo = [...data.fuelRefuels].sort((a, b) => a.odometer - b.odometer)
 
@@ -175,7 +175,7 @@ export default function FuelRefuels() {
             initial={editing ?? undefined}
             onSubmit={editing ? handleUpdate : handleAdd}
             onCancel={() => { setShowForm(false); setEditing(null) }}
-            isSubmitting={submitting || isSyncing}
+            isSubmitting={submitting}
           />
         </Modal>
       )}
