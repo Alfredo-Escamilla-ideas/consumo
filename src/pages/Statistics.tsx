@@ -6,12 +6,15 @@ import {
   getMonthlyData,
   getFuelConsumptionPerRefuel,
   getElectricEfficiencyPerCharge,
+  getChargingStationRanking,
+  getFuelStationRanking,
   formatCurrency,
   formatNumber,
+  formatDate,
 } from '../utils/calculations'
 import StatCard from '../components/StatCard'
 import {
-  Zap, Fuel, Euro, Route, Leaf, TrendingUp, BarChart3, Droplets, Battery
+  Zap, Fuel, Euro, Route, Leaf, TrendingUp, BarChart3, Droplets, Battery, Trophy, MapPin
 } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -32,6 +35,8 @@ export default function Statistics() {
   const monthly = getMonthlyData(electricCharges, fuelRefuels)
   const fuelConsPerRefuel = getFuelConsumptionPerRefuel(fuelRefuels)
   const elEffPerCharge = getElectricEfficiencyPerCharge(electricCharges)
+  const chargingRanking = getChargingStationRanking(electricCharges)
+  const fuelRanking = getFuelStationRanking(fuelRefuels)
 
   const hasData = electricCharges.length > 0 || fuelRefuels.length > 0
 
@@ -234,6 +239,71 @@ export default function Statistics() {
           </div>
         </div>
       )}
+
+      {/* Station rankings */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Charging station ranking */}
+        {chargingRanking.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <h2 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+              <Trophy size={15} className="text-blue-400" /> Ranking puntos de carga
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">De más barato a más caro (€/kWh medio)</p>
+            <div className="space-y-2">
+              {chargingRanking.map((s, i) => (
+                <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${i === 0 ? 'bg-emerald-50 border-emerald-100' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
+                  <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                    ${i === 0 ? 'bg-emerald-500 text-white' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-red-400 text-white' : 'bg-slate-300 text-slate-700'}`}>
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{s.name}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1 truncate"><MapPin size={10} />{s.address}</p>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">{formatNumber(s.avgPrice, 4)} €/kWh</span>
+                      <span className="text-xs text-slate-500">{s.visits} visita{s.visits !== 1 ? 's' : ''}</span>
+                      <span className="text-xs text-slate-500">{formatNumber(s.totalUnits)} kWh</span>
+                      <span className="text-xs text-slate-500">{formatCurrency(s.totalSpent)}</span>
+                      <span className="text-xs text-slate-400">Última: {formatDate(s.lastVisit)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fuel station ranking */}
+        {fuelRanking.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <h2 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+              <Trophy size={15} className="text-orange-400" /> Ranking gasolineras
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">De más barata a más cara (€/litro medio)</p>
+            <div className="space-y-2">
+              {fuelRanking.map((s, i) => (
+                <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${i === 0 ? 'bg-emerald-50 border-emerald-100' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
+                  <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                    ${i === 0 ? 'bg-emerald-500 text-white' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-red-400 text-white' : 'bg-slate-300 text-slate-700'}`}>
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{s.name}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1 truncate"><MapPin size={10} />{s.address}</p>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full">{formatNumber(s.avgPrice, 3)} €/L</span>
+                      <span className="text-xs text-slate-500">{s.visits} visita{s.visits !== 1 ? 's' : ''}</span>
+                      <span className="text-xs text-slate-500">{formatNumber(s.totalUnits)} L</span>
+                      <span className="text-xs text-slate-500">{formatCurrency(s.totalSpent)}</span>
+                      <span className="text-xs text-slate-400">Última: {formatDate(s.lastVisit)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Detailed summary table */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5">

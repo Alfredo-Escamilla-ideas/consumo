@@ -7,6 +7,16 @@ import type {
   MonthlyData,
 } from '../types'
 
+export interface StationRank {
+  name: string
+  address: string
+  avgPrice: number      // €/kWh o €/litro (media ponderada)
+  visits: number
+  totalSpent: number
+  totalUnits: number    // kWh o litros
+  lastVisit: string     // ISO date
+}
+
 const BATTERY_CAPACITY_KWH = 18.3
 // CO2 gasoline: 2.31 kg/L; Spain grid CO2: ~0.18 kg/kWh (2024)
 const CO2_PER_LITER = 2.31
@@ -218,6 +228,86 @@ export function getElectricEfficiencyPerCharge(
       efficiency: fmt2((c.kWh / (c.odometerEnd - c.odometerStart)) * 100),
       label: c.date.substring(5),
     }))
+}
+
+export function getChargingStationRanking(charges: ElectricCharge[]): StationRank[] {
+  const map = new Map<string, { totalCost: number; totalKWh: number; visits: number; address: string; lastVisit: string }>()
+  for (const c of charges) {
+    const key = c.stationName.toLowerCase().trim()
+    const prev = map.get(key)
+    if (prev) {
+      prev.totalCost += c.totalPrice
+      prev.totalKWh += c.kWh
+      prev.visits++
+      if (c.date > prev.lastVisit) { prev.lastVisit = c.date; prev.address = c.stationAddress }
+    } else {
+      map.set(key, { totalCost: c.totalPrice, totalKWh: c.kWh, visits: 1, address: c.stationAddress, lastVisit: c.date })
+    }
+  }
+  return Array.from(map.entries())
+    .map(([name, d]) => ({
+      name: charges.find(c => c.stationName.toLowerCase().trim() === name)?.stationName ?? name,
+      address: d.address,
+      avgPrice: d.totalKWh > 0 ? fmt2(d.totalCost / d.totalKWh) : 0,
+      visits: d.visits,
+      totalSpent: fmt2(d.totalCost),
+      totalUnits: fmt2(d.totalKWh),
+      lastVisit: d.lastVisit,
+    }))
+    .sort((a, b) => a.avgPrice - b.avgPrice)
+}
+
+export function getFuelStationRanking(refuels: FuelRefuel[]): StationRank[] {
+  const map = new Map<string, { totalCost: number; totalLiters: number; visits: number; address: string; lastVisit: string }>()
+  for (const r of refuels) {
+    const key = r.stationName.toLowerCase().trim()
+    const prev = map.get(key)
+    if (prev) {
+      prev.totalCost += r.totalPrice
+      prev.totalLiters += r.liters
+      prev.visits++
+      if (r.date > prev.lastVisit) { prev.lastVisit = r.date; prev.address = r.stationAddress }
+    } else {
+      map.set(key, { totalCost: r.totalPrice, totalLiters: r.liters, visits: 1, address: r.stationAddress, lastVisit: r.date })
+    }
+  }
+  return Array.from(map.entries())
+    .map(([name, d]) => ({
+      name: refuels.find(r => r.stationName.toLowerCase().trim() === name)?.stationName ?? name,
+      address: d.address,
+      avgPrice: d.totalLiters > 0 ? fmt2(d.totalCost / d.totalLiters) : 0,
+      visits: d.visits,
+      totalSpent: fmt2(d.totalCost),
+      totalUnits: fmt2(d.totalLiters),
+      lastVisit: d.lastVisit,
+    }))
+    .sort((a, b) => a.avgPrice - b.avgPrice)
+}
+
+export interface KnownStation { name: string; address: string }
+
+export function getKnownChargingStations(charges: ElectricCharge[]): KnownStation[] {
+  const seen = new Map<string, string>()
+  for (const c of [...charges].sort((a, b) => b.date.localeCompare(a.date))) {
+    const key = c.stationName.toLowerCase().trim()
+    if (!seen.has(key)) seen.set(key, c.stationAddress)
+  }
+  return Array.from(seen.entries()).map(([, address], i) => ({
+    name: charges.find(c => c.stationName.toLowerCase().trim() === Array.from(seen.keys())[i])?.stationName ?? '',
+    address,
+  }))
+}
+
+export function getKnownFuelStations(refuels: FuelRefuel[]): KnownStation[] {
+  const seen = new Map<string, string>()
+  for (const r of [...refuels].sort((a, b) => b.date.localeCompare(a.date))) {
+    const key = r.stationName.toLowerCase().trim()
+    if (!seen.has(key)) seen.set(key, r.stationAddress)
+  }
+  return Array.from(seen.entries()).map(([, address], i) => ({
+    name: refuels.find(r => r.stationName.toLowerCase().trim() === Array.from(seen.keys())[i])?.stationName ?? '',
+    address,
+  }))
 }
 
 export function formatDate(dateStr: string): string {

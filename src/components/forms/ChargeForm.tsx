@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import type { ElectricCharge } from '../../types'
+import StationInput from '../StationInput'
+import { useData } from '../../context/DataContext'
+import { getKnownChargingStations } from '../../utils/calculations'
 
 interface ChargeFormProps {
   initial?: ElectricCharge
@@ -21,6 +24,9 @@ const EMPTY = {
 }
 
 export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }: ChargeFormProps) {
+  const { data } = useData()
+  const knownStations = getKnownChargingStations(data.electricCharges)
+
   const [f, setF] = useState(
     initial
       ? {
@@ -38,7 +44,6 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Auto-calc pricePerKWh when kWh & totalPrice change
   useEffect(() => {
     const kwh = parseFloat(f.kWh)
     const price = parseFloat(f.totalPrice)
@@ -90,7 +95,6 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Preview badge */}
       {(efficiency || chargePercent) && (
         <div className="flex gap-3 flex-wrap">
           {efficiency && (
@@ -108,33 +112,38 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Fecha" error={errors.date}>
-          <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={input(errors.date)} />
+          <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={inp(errors.date)} />
         </Field>
         <Field label="kWh recargados" error={errors.kWh}>
-          <input type="number" step="0.01" min="0" placeholder="e.g. 15.5" value={f.kWh} onChange={e => set('kWh', e.target.value)} className={input(errors.kWh)} />
+          <input type="number" step="0.01" min="0" placeholder="e.g. 15.5" value={f.kWh} onChange={e => set('kWh', e.target.value)} className={inp(errors.kWh)} />
         </Field>
         <Field label="Precio total (€)" error={errors.totalPrice}>
-          <input type="number" step="0.01" min="0" placeholder="e.g. 4.20" value={f.totalPrice} onChange={e => set('totalPrice', e.target.value)} className={input(errors.totalPrice)} />
+          <input type="number" step="0.01" min="0" placeholder="e.g. 4.20" value={f.totalPrice} onChange={e => set('totalPrice', e.target.value)} className={inp(errors.totalPrice)} />
         </Field>
         <Field label="Monedero Waylet €" error={errors.pricePerKWh}>
-          <input type="number" step="0.0001" min="0" placeholder="e.g. 0.27" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={input(errors.pricePerKWh)} />
+          <input type="number" step="0.0001" min="0" placeholder="e.g. 0.27" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={inp(errors.pricePerKWh)} />
         </Field>
         <Field label="Km al inicio (última carga)" error={errors.odometerStart}>
-          <input type="number" min="0" placeholder="e.g. 1200" value={f.odometerStart} onChange={e => set('odometerStart', e.target.value)} className={input(errors.odometerStart)} />
+          <input type="number" min="0" placeholder="e.g. 1200" value={f.odometerStart} onChange={e => set('odometerStart', e.target.value)} className={inp(errors.odometerStart)} />
         </Field>
         <Field label="Km al final (esta carga)" error={errors.odometerEnd}>
-          <input type="number" min="0" placeholder="e.g. 1380" value={f.odometerEnd} onChange={e => set('odometerEnd', e.target.value)} className={input(errors.odometerEnd)} />
+          <input type="number" min="0" placeholder="e.g. 1380" value={f.odometerEnd} onChange={e => set('odometerEnd', e.target.value)} className={inp(errors.odometerEnd)} />
         </Field>
       </div>
 
-      <Field label="Nombre de la estación" error={errors.stationName}>
-        <input type="text" placeholder="e.g. Zunder Madrid" value={f.stationName} onChange={e => set('stationName', e.target.value)} className={input(errors.stationName)} />
-      </Field>
-      <Field label="Dirección" error={errors.stationAddress}>
-        <input type="text" placeholder="e.g. Calle Gran Vía 32, Madrid" value={f.stationAddress} onChange={e => set('stationAddress', e.target.value)} className={input(errors.stationAddress)} />
-      </Field>
+      <StationInput
+        nameValue={f.stationName}
+        addressValue={f.stationAddress}
+        onChangeName={v => set('stationName', v)}
+        onChangeAddress={v => set('stationAddress', v)}
+        known={knownStations}
+        nameError={errors.stationName}
+        addressError={errors.stationAddress}
+        accentColor="blue"
+      />
+
       <Field label="Notas (opcional)">
-        <input type="text" placeholder="Observaciones…" value={f.notes} onChange={e => set('notes', e.target.value)} className={input()} />
+        <input type="text" placeholder="Observaciones…" value={f.notes} onChange={e => set('notes', e.target.value)} className={inp()} />
       </Field>
 
       <div className="flex gap-3 pt-2 justify-end">
@@ -159,7 +168,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   )
 }
 
-function input(error?: string) {
+function inp(error?: string) {
   return `w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors
     ${error ? 'border-red-300 focus:border-red-400 bg-red-50' : 'border-slate-200 focus:border-blue-400 bg-white'}
     placeholder:text-slate-400`
