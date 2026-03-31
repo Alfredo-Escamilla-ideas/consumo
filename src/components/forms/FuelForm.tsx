@@ -88,7 +88,7 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Fecha" error={errors.date}>
           <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={input(errors.date)} />
         </Field>
