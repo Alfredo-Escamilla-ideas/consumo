@@ -60,7 +60,7 @@ export default function Settings() {
         </div>
         <dl className="space-y-2">
           <Row label="Versión" value="2.0.0" />
-          <Row label="Base de datos" value="MySQL · jaecoo7.lienzovirtual.com" />
+          <Row label="Base de datos" value="MySQL · lienzovirtual.com" />
           <Row label="Datos" value="Exclusivos por matrícula" />
         </dl>
       </div>
