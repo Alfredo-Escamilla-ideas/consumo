@@ -1,6 +1,6 @@
 import type { ElectricCharge, FuelRefuel } from '../types'
 
-const BASE = '/api'
+const BASE = '/jaecoo7/api'
 
 function getToken() {
   return localStorage.getItem('consumo_token') ?? ''
