@@ -2,28 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════
+   JAECOO 7 — Design System Tokens
+   Inspirado en la pantalla de 14.8" del vehículo
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Fondos */
+  --j-base:           #080c14;
+  --j-surface:        #0e1520;
+  --j-card:           #141c2e;
+  --j-elevated:       #1b2438;
+
+  /* Bordes semitransparentes */
+  --j-border:         rgba(255, 255, 255, 0.07);
+  --j-border-strong:  rgba(255, 255, 255, 0.14);
+
+  /* Tipografía */
+  --j-text-primary:   #e2e8f0;
+  --j-text-secondary: #94a3b8;
+  --j-text-muted:     #475569;
+
+  /* Energía eléctrica — cyan */
+  --j-electric:       #22d3ee;
+  --j-electric-dim:   rgba(34, 211, 238, 0.12);
+  --j-electric-glow:  rgba(34, 211, 238, 0.25);
+
+  /* Gasolina — ámbar */
+  --j-fuel:           #fb923c;
+  --j-fuel-dim:       rgba(251, 146, 60, 0.12);
+  --j-fuel-glow:      rgba(251, 146, 60, 0.25);
+
+  /* Acciones UI */
+  --j-accent:         #3b82f6;
+  --j-success:        #10b981;
+  --j-danger:         #f87171;
+
+  /* Sombras */
+  --j-shadow-card:     0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.6);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE GLOBAL
+   ═══════════════════════════════════════════════════════════════ */
 @layer base {
-  * {
+  *, *::before, *::after {
     box-sizing: border-box;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    scroll-padding-top: 112px; /* header 64px + subnav ~48px */
   }
 
   body {
-    @apply bg-slate-50 text-slate-900;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    @apply bg-jaecoo-base text-jaecoo-primary;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
+  /* Quitar flechas en inputs numéricos */
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
-    opacity: 0.5;
+    opacity: 0.4;
+  }
+
+  /* Icono del calendario visible sobre fondo oscuro */
+  input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) opacity(0.6);
+    cursor: pointer;
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   UTILIDADES PERSONALIZADAS
+   ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
+  /* Scrollbar oculto */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -31,4 +87,68 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Glassmorphism — tarjetas con fondo translúcido */
+  .j-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--j-border);
+  }
+
+  /* Glow eléctrico */
+  .j-glow-electric {
+    box-shadow: 0 0 24px var(--j-electric-glow), 0 2px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Glow gasolina */
+  .j-glow-fuel {
+    box-shadow: 0 0 24px var(--j-fuel-glow), 0 2px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Gradiente de texto — para valores destacados */
+  .j-text-electric {
+    background: linear-gradient(90deg, var(--j-electric), #67e8f9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .j-text-fuel {
+    background: linear-gradient(90deg, var(--j-fuel), #fcd34d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESIBILIDAD — Focus visible para navegación con teclado
+   ═══════════════════════════════════════════════════════════════ */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--j-electric) !important;
+  outline-offset: 2px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBAR PERSONALIZADA (Webkit)
+   ═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--j-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

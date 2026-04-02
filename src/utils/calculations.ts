@@ -5,6 +5,7 @@ import type {
   FuelStats,
   CombinedStats,
   MonthlyData,
+  DrivingMode,
 } from '../types'
 
 export interface StationRank {
@@ -17,7 +18,7 @@ export interface StationRank {
   lastVisit: string     // ISO date
 }
 
-const BATTERY_CAPACITY_KWH = 18.3
+export const BATTERY_CAPACITY_KWH = 18.3
 // CO2 gasoline: 2.31 kg/L; Spain grid CO2: ~0.18 kg/kWh (2024)
 const CO2_PER_LITER = 2.31
 const CO2_PER_KWH_GRID = 0.18
@@ -29,27 +30,36 @@ export function fmt2(n: number): number {
 export function calcElectricStats(charges: ElectricCharge[]): ElectricStats {
   if (charges.length === 0) {
     return {
-      totalKWh: 0,
-      totalCost: 0,
-      totalKm: 0,
-      avgEfficiency: 0,
-      avgCostPerKm: 0,
-      avgChargeKWh: 0,
-      avgKmPerCharge: 0,
-      totalCharges: 0,
-      batteryCapacity: BATTERY_CAPACITY_KWH,
-      avgChargePercent: 0,
+      totalKWh: 0, totalCost: 0, totalKm: 0, avgEfficiency: 0,
+      avgCostPerKm: 0, avgChargeKWh: 0, avgKmPerCharge: 0,
+      totalCharges: 0, batteryCapacity: BATTERY_CAPACITY_KWH, avgChargePercent: 0,
     }
   }
 
-  const totalKWh = charges.reduce((s, c) => s + c.kWh, 0)
-  const totalCost = charges.reduce((s, c) => s + c.totalPrice, 0)
-  const totalKm = charges.reduce((s, c) => s + Math.max(0, c.odometerEnd - c.odometerStart), 0)
-  const avgEfficiency = totalKm > 0 ? (totalKWh / totalKm) * 100 : 0
-  const avgCostPerKm = totalKm > 0 ? totalCost / totalKm : 0
-  const avgChargeKWh = totalKWh / charges.length
-  const avgKmPerCharge = totalKm / charges.length
+  // Sort by odometer ascending — consecutive diff method (like fuel full-tank)
+  const sorted = [...charges].sort((a, b) => a.odometer - b.odometer)
+  const totalKWh = sorted.reduce((s, c) => s + c.kWh, 0)
+  const totalCost = sorted.reduce((s, c) => s + c.totalPrice, 0)
+  const avgChargeKWh = totalKWh / sorted.length
   const avgChargePercent = (avgChargeKWh / BATTERY_CAPACITY_KWH) * 100
+
+  // km and efficiency: calculated from consecutive pairs
+  // efficiency[i] = sorted[i-1].kWh / km between i-1 and i
+  let totalKm = 0
+  let efficiencySum = 0
+  let efficiencyCount = 0
+  for (let i = 1; i < sorted.length; i++) {
+    const km = sorted[i].odometer - sorted[i - 1].odometer
+    if (km > 0) {
+      totalKm += km
+      efficiencySum += (sorted[i - 1].kWh / km) * 100
+      efficiencyCount++
+    }
+  }
+
+  const avgEfficiency = efficiencyCount > 0 ? efficiencySum / efficiencyCount : 0
+  const avgCostPerKm = totalKm > 0 ? totalCost / totalKm : 0
+  const avgKmPerCharge = efficiencyCount > 0 ? totalKm / efficiencyCount : 0
 
   return {
     totalKWh: fmt2(totalKWh),
@@ -59,7 +69,7 @@ export function calcElectricStats(charges: ElectricCharge[]): ElectricStats {
     avgCostPerKm: fmt2(avgCostPerKm),
     avgChargeKWh: fmt2(avgChargeKWh),
     avgKmPerCharge: fmt2(avgKmPerCharge),
-    totalCharges: charges.length,
+    totalCharges: sorted.length,
     batteryCapacity: BATTERY_CAPACITY_KWH,
     avgChargePercent: fmt2(avgChargePercent),
   }
@@ -174,13 +184,18 @@ export function getMonthlyData(
     return monthMap.get(ym)!
   }
 
-  for (const c of charges) {
+  const sortedCharges = [...charges].sort((a, b) => a.odometer - b.odometer)
+  for (let i = 0; i < sortedCharges.length; i++) {
+    const c = sortedCharges[i]
     const ym = c.date.substring(0, 7)
     const m = ensureMonth(ym)
     m.electricCost += c.totalPrice
     m.totalCost += c.totalPrice
     m.kWh += c.kWh
-    m.electricKm += Math.max(0, c.odometerEnd - c.odometerStart)
+    if (i > 0) {
+      const km = c.odometer - sortedCharges[i - 1].odometer
+      if (km > 0) m.electricKm += km
+    }
   }
 
   const sortedRefuels = [...refuels].sort((a, b) => a.odometer - b.odometer)
@@ -220,14 +235,19 @@ export function getFuelConsumptionPerRefuel(
 export function getElectricEfficiencyPerCharge(
   charges: ElectricCharge[]
 ): { date: string; efficiency: number; label: string }[] {
-  return charges
-    .filter((c) => c.odometerEnd > c.odometerStart)
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((c) => ({
-      date: c.date,
-      efficiency: fmt2((c.kWh / (c.odometerEnd - c.odometerStart)) * 100),
-      label: c.date.substring(5),
-    }))
+  const sorted = [...charges].sort((a, b) => a.odometer - b.odometer)
+  const result: { date: string; efficiency: number; label: string }[] = []
+  for (let i = 1; i < sorted.length; i++) {
+    const km = sorted[i].odometer - sorted[i - 1].odometer
+    if (km > 0) {
+      result.push({
+        date: sorted[i].date,
+        efficiency: fmt2((sorted[i - 1].kWh / km) * 100),
+        label: sorted[i].date.substring(5),
+      })
+    }
+  }
+  return result
 }
 
 export function getChargingStationRanking(charges: ElectricCharge[]): StationRank[] {
@@ -308,6 +328,147 @@ export function getKnownFuelStations(refuels: FuelRefuel[]): KnownStation[] {
     name: refuels.find(r => r.stationName.toLowerCase().trim() === Array.from(seen.keys())[i])?.stationName ?? '',
     address,
   }))
+}
+
+export interface DrivingModeStats {
+  mode: DrivingMode
+  label: string
+  icon: string
+  // Electric
+  elCharges: number
+  elKWh100km: number
+  elCostPerKm: number
+  elTotalKm: number
+  // Fuel
+  fuRefuels: number
+  fuL100km: number
+  fuCostPerKm: number
+  fuTotalKm: number
+  // Combined
+  combinedCostPerKm: number
+}
+
+export function getStatsByDrivingMode(
+  charges: ElectricCharge[],
+  refuels: FuelRefuel[]
+): DrivingModeStats[] {
+  const MODES: { mode: DrivingMode; label: string; icon: string }[] = [
+    { mode: 'city',    label: 'Ciudad',    icon: '🏙️' },
+    { mode: 'highway', label: 'Carretera', icon: '🛣️' },
+    { mode: 'mixed',   label: 'Mixto',     icon: '🔄' },
+  ]
+
+  const sortedRefuels = [...refuels].sort((a, b) => a.odometer - b.odometer)
+
+  return MODES.map(({ mode, label, icon }) => {
+    // Electric stats for this mode — consecutive diff method
+    // A charge with drivingMode=X means the trip FROM the previous charge was mode X.
+    // km for that trip = this.odometer - prev.odometer
+    const allSortedCharges = [...charges].sort((a, b) => a.odometer - b.odometer)
+    let elTotalKm = 0, elTotalKWh = 0, elTotalCost = 0, elChargeCount = 0
+    for (let i = 0; i < allSortedCharges.length; i++) {
+      const c = allSortedCharges[i]
+      if (c.drivingMode !== mode) continue
+      // km of this trip = distance from previous charge
+      if (i > 0) {
+        const km = c.odometer - allSortedCharges[i - 1].odometer
+        if (km > 0) {
+          elTotalKm += km
+          elTotalKWh += allSortedCharges[i - 1].kWh // energy consumed on this trip
+          elTotalCost += allSortedCharges[i - 1].totalPrice
+        }
+      }
+      elChargeCount++
+    }
+    const elKWh100km = elTotalKm > 0 ? fmt2((elTotalKWh / elTotalKm) * 100) : 0
+    const elCostPerKm = elTotalKm > 0 ? fmt2(elTotalCost / elTotalKm) : 0
+
+    // Fuel stats for this mode
+    const fuFiltered = refuels.filter(r => r.drivingMode === mode)
+    let fuTotalKm = 0
+    let fuTotalLiters = 0
+    let fuTotalCost = 0
+    for (const r of fuFiltered) {
+      const idx = sortedRefuels.findIndex(x => x.id === r.id)
+      if (idx > 0) {
+        const km = r.odometer - sortedRefuels[idx - 1].odometer
+        if (km > 0) fuTotalKm += km
+      }
+      fuTotalLiters += r.liters
+      fuTotalCost += r.totalPrice
+    }
+    const fuL100km = fuTotalKm > 0 ? fmt2((fuTotalLiters / fuTotalKm) * 100) : 0
+    const fuCostPerKm = fuTotalKm > 0 ? fmt2(fuTotalCost / fuTotalKm) : 0
+
+    // Combined
+    const totalKm = elTotalKm + fuTotalKm
+    const totalCost = elTotalCost + fuTotalCost
+    const combinedCostPerKm = totalKm > 0 ? fmt2(totalCost / totalKm) : 0
+
+    return {
+      mode, label, icon,
+      elCharges: elChargeCount,
+      elKWh100km, elCostPerKm, elTotalKm: fmt2(elTotalKm),
+      fuRefuels: fuFiltered.length,
+      fuL100km, fuCostPerKm, fuTotalKm: fmt2(fuTotalKm),
+      combinedCostPerKm,
+    }
+  }).filter(s => s.elCharges > 0 || s.fuRefuels > 0)
+}
+
+/**
+ * Eficiencia eléctrica real basada en los últimos N tramos.
+ * Más precisa que el promedio global: refleja el estilo de conducción reciente.
+ * Devuelve kWh/100km, o 0 si no hay datos suficientes.
+ */
+export function getRecentEfficiency(charges: ElectricCharge[], n = 5): number {
+  const sorted = [...charges].sort((a, b) => a.odometer - b.odometer)
+  // Necesitamos n+1 registros para tener n tramos
+  const window = sorted.slice(-Math.min(n + 1, sorted.length))
+  let totalKWh = 0
+  let totalKm  = 0
+  for (let i = 1; i < window.length; i++) {
+    const km = window[i].odometer - window[i - 1].odometer
+    if (km > 0) {
+      totalKm  += km
+      totalKWh += window[i - 1].kWh
+    }
+  }
+  return totalKm > 0 ? (totalKWh / totalKm) * 100 : 0
+}
+
+/**
+ * Consumo de gasolina real basado en los últimos N tramos.
+ * Usa el método depósito lleno (consecutive diff).
+ * Devuelve L/100km, o 0 si no hay datos suficientes.
+ */
+export function getRecentConsumption(refuels: FuelRefuel[], n = 5): number {
+  const sorted = [...refuels].sort((a, b) => a.odometer - b.odometer)
+  const window = sorted.slice(-Math.min(n + 1, sorted.length))
+  let totalLiters = 0
+  let totalKm     = 0
+  for (let i = 1; i < window.length; i++) {
+    const km = window[i].odometer - window[i - 1].odometer
+    if (km > 0) {
+      totalKm     += km
+      totalLiters += window[i].liters
+    }
+  }
+  return totalKm > 0 ? (totalLiters / totalKm) * 100 : 0
+}
+
+export function getWayletEffectivePriceHistory(
+  charges: ElectricCharge[]
+): { date: string; effective: number; tariff: number; label: string }[] {
+  return charges
+    .filter(c => c.wayletBefore != null)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map(c => ({
+      date: c.date,
+      tariff: fmt2(c.pricePerKWh),
+      effective: c.kWh > 0 ? fmt2(c.totalPrice / c.kWh) : fmt2(c.pricePerKWh),
+      label: c.date.substring(5),
+    }))
 }
 
 export function formatDate(dateStr: string): string {

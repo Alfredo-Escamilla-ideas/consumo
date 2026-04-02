@@ -9,58 +9,67 @@ interface StatCardProps {
   trend?: { value: string; positive: boolean }
 }
 
+// Mapa de colores — paleta JAECOO dark
 const colorMap = {
   blue: {
-    bg: 'bg-blue-50',
-    icon: 'bg-blue-500 text-white',
-    text: 'text-blue-700',
-    border: 'border-blue-100',
+    card:  'border-jaecoo-electric/20 hover:border-jaecoo-electric/40 hover:shadow-j-electric',
+    icon:  'bg-jaecoo-electric-dim text-jaecoo-electric',
+    value: 'text-jaecoo-electric',
   },
   orange: {
-    bg: 'bg-orange-50',
-    icon: 'bg-orange-500 text-white',
-    text: 'text-orange-700',
-    border: 'border-orange-100',
+    card:  'border-jaecoo-fuel/20 hover:border-jaecoo-fuel/40 hover:shadow-j-fuel',
+    icon:  'bg-jaecoo-fuel-dim text-jaecoo-fuel',
+    value: 'text-jaecoo-fuel',
   },
   emerald: {
-    bg: 'bg-emerald-50',
-    icon: 'bg-emerald-500 text-white',
-    text: 'text-emerald-700',
-    border: 'border-emerald-100',
+    card:  'border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-[0_0_24px_rgba(16,185,129,0.2)]',
+    icon:  'bg-emerald-500/10 text-emerald-400',
+    value: 'text-emerald-400',
   },
   violet: {
-    bg: 'bg-violet-50',
-    icon: 'bg-violet-500 text-white',
-    text: 'text-violet-700',
-    border: 'border-violet-100',
+    card:  'border-violet-500/20 hover:border-violet-500/40 hover:shadow-[0_0_24px_rgba(139,92,246,0.2)]',
+    icon:  'bg-violet-500/10 text-violet-400',
+    value: 'text-violet-400',
   },
   slate: {
-    bg: 'bg-slate-50',
-    icon: 'bg-slate-500 text-white',
-    text: 'text-slate-700',
-    border: 'border-slate-200',
+    card:  'border-jaecoo-border hover:border-jaecoo-border-strong',
+    icon:  'bg-jaecoo-elevated text-jaecoo-secondary',
+    value: 'text-jaecoo-primary',
   },
   rose: {
-    bg: 'bg-rose-50',
-    icon: 'bg-rose-500 text-white',
-    text: 'text-rose-700',
-    border: 'border-rose-100',
+    card:  'border-rose-500/20 hover:border-rose-500/40 hover:shadow-[0_0_24px_rgba(244,63,94,0.2)]',
+    icon:  'bg-rose-500/10 text-rose-400',
+    value: 'text-rose-400',
   },
 }
 
 export default function StatCard({ title, value, subtitle, icon: Icon, color, trend }: StatCardProps) {
   const c = colorMap[color]
   return (
-    <div className={`rounded-2xl border ${c.border} ${c.bg} p-5 flex items-start gap-4`}>
+    <div className={`
+      bg-jaecoo-card rounded-2xl border p-5
+      flex items-start gap-4
+      shadow-j-card transition-all duration-200
+      ${c.card}
+    `}>
+      {/* Icono */}
       <div className={`rounded-xl p-2.5 ${c.icon} shrink-0`}>
         <Icon size={20} />
       </div>
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide truncate">{title}</p>
-        <p className={`text-2xl font-bold mt-0.5 ${c.text} leading-none`}>{value}</p>
-        {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
+
+      {/* Contenido */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold text-jaecoo-muted uppercase tracking-widest truncate">
+          {title}
+        </p>
+        <p className={`text-2xl font-bold mt-0.5 leading-none ${c.value}`}>
+          {value}
+        </p>
+        {subtitle && (
+          <p className="text-xs text-jaecoo-muted mt-1">{subtitle}</p>
+        )}
         {trend && (
-          <p className={`text-xs mt-1 font-medium ${trend.positive ? 'text-emerald-600' : 'text-red-500'}`}>
+          <p className={`text-xs mt-1 font-semibold ${trend.positive ? 'text-emerald-400' : 'text-rose-400'}`}>
             {trend.positive ? '↑' : '↓'} {trend.value}
           </p>
         )}
