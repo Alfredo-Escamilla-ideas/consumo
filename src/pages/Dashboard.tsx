@@ -12,6 +12,7 @@ import {
   formatCurrency,
   formatNumber,
   BATTERY_CAPACITY_KWH,
+  FUEL_TANK_LITERS,
   EL_MAX_RANGE_KM,
   FUEL_MAX_RANGE_KM,
 } from '../utils/calculations'
@@ -63,8 +64,9 @@ export default function Dashboard() {
 
   const kmSinceRefuel = lastRefuel ? currentOdo - lastRefuel.odometer : null
   const litersUsedSince = kmSinceRefuel != null ? (kmSinceRefuel * avgCons) / 100 : 0
-  const fuelRangeKm = lastRefuel
-    ? Math.round(Math.max(0, lastRefuel.liters - litersUsedSince) / (avgCons / 100))
+  const litersRemaining = lastRefuel ? Math.max(0, lastRefuel.liters - litersUsedSince) : null
+  const fuelRangeKm = litersRemaining != null
+    ? Math.round((litersRemaining / FUEL_TANK_LITERS) * FUEL_MAX_RANGE_KM)
     : null
 
   const savedVsAllFuel = fuStats.avgCostPerKm > 0

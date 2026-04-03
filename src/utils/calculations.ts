@@ -18,12 +18,13 @@ export interface StationRank {
   lastVisit: string     // ISO date
 }
 
-export const BATTERY_CAPACITY_KWH = 18.3
+export const BATTERY_CAPACITY_KWH  = 18.3
+export const FUEL_TANK_LITERS      = 60   // capacidad depósito gasolina (litros)
 
 // ── Autonomía máxima por tipo de propulsión (valores reales del Jaecoo 7 PHEV) ──
-export const EL_MAX_RANGE_KM      = 105   // km eléctrico puro al 100% (con regen e inercia)
-export const FUEL_MAX_RANGE_KM    = 1116  // km en gasolina con depósito lleno (dato oficial)
-export const COMBINED_MAX_RANGE_KM = 1116  // km ciclo combinado (gasolina domina el rango total)
+export const EL_MAX_RANGE_KM       = 105  // km eléctrico puro al 100% (con regen e inercia)
+export const FUEL_MAX_RANGE_KM     = 1116 // km en gasolina con depósito lleno (dato oficial)
+export const COMBINED_MAX_RANGE_KM = 1116 // km ciclo combinado (gasolina domina el rango total)
 
 // CO2 gasoline: 2.31 kg/L; Spain grid CO2: ~0.18 kg/kWh (2024)
 const CO2_PER_LITER = 2.31
