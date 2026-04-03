@@ -15,7 +15,7 @@ import {
   formatDate,
 } from '../utils/calculations'
 import StatCard from '../components/StatCard'
-import BatteryHealth from '../components/BatteryHealth'
+import { calcBatteryHealthSummary } from '../utils/calculations'
 import {
   Zap, Fuel, Euro, Route, Leaf, TrendingUp, BarChart3, Droplets, Battery, Trophy, MapPin, Navigation
 } from 'lucide-react'
@@ -518,15 +518,56 @@ export default function Statistics() {
         </div>
       </div>
 
-      {/* Battery Health */}
-      {electricCharges.length > 0 && (
-        <div id="bateria" className="scroll-mt-28">
-          <h2 className="text-sm font-semibold text-jaecoo-primary mb-3 flex items-center gap-2">
-            <Battery size={16} className="text-jaecoo-electric" /> Salud de la batería
-          </h2>
-          <BatteryHealth charges={electricCharges} />
+      {/* Puntuación Recargas */}
+      {electricCharges.length > 0 && <ChargeScoreCard charges={electricCharges} />}
+    </div>
+  )
+}
+
+function ChargeScoreCard({ charges }: { charges: import('../types').ElectricCharge[] }) {
+  const summary = calcBatteryHealthSummary(charges)
+  if (summary.scoredCount === 0) return null
+
+  const tiers = [
+    { label: 'Óptima',  color: 'text-emerald-400', bar: 'bg-emerald-500', count: summary.records.filter(r => r.label === 'Óptima').length },
+    { label: 'Buena',   color: 'text-jaecoo-electric', bar: 'bg-jaecoo-electric', count: summary.records.filter(r => r.label === 'Buena').length },
+    { label: 'Regular', color: 'text-jaecoo-fuel',     bar: 'bg-jaecoo-fuel',     count: summary.records.filter(r => r.label === 'Regular').length },
+    { label: 'Baja',    color: 'text-rose-400',        bar: 'bg-rose-500',        count: summary.records.filter(r => r.label === 'Baja').length },
+  ]
+  const scoreColor = summary.overall >= 80 ? 'text-emerald-400' : summary.overall >= 60 ? 'text-jaecoo-electric' : summary.overall >= 35 ? 'text-jaecoo-fuel' : 'text-rose-400'
+
+  return (
+    <div id="bateria" className="scroll-mt-28 bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-jaecoo-primary flex items-center gap-2">
+          <Battery size={16} className="text-jaecoo-electric" /> Puntuación Recargas
+        </h2>
+        <div className="text-right">
+          <span className={`text-2xl font-bold ${scoreColor}`}>{summary.overall}</span>
+          <span className="text-xs text-jaecoo-muted"> / 100</span>
+          <p className={`text-xs font-semibold ${scoreColor}`}>{summary.label}</p>
         </div>
-      )}
+      </div>
+
+      <div className="space-y-2.5">
+        {tiers.map(t => (
+          <div key={t.label} className="flex items-center gap-3">
+            <span className={`w-14 text-xs font-semibold shrink-0 ${t.color}`}>{t.label}</span>
+            <div className="flex-1 h-2.5 bg-jaecoo-elevated rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full ${t.bar} transition-all`}
+                style={{ width: summary.scoredCount > 0 ? `${(t.count / summary.scoredCount) * 100}%` : '0%' }}
+              />
+            </div>
+            <span className="w-6 text-right text-xs font-bold text-jaecoo-secondary shrink-0">{t.count}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-[11px] text-jaecoo-muted mt-3">
+        {summary.scoredCount} recargas puntuadas · rango óptimo 20–80%
+        {summary.scoredCount < summary.totalCount && ` · ${summary.totalCount - summary.scoredCount} sin datos`}
+      </p>
     </div>
   )
 }
