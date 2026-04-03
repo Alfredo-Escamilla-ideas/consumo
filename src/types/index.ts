@@ -30,6 +30,26 @@ export interface FuelRefuel {
   notes?: string
 }
 
+export type InsuranceType = 'third_party' | 'third_party_plus' | 'comprehensive_excess' | 'comprehensive'
+
+export interface Insurance {
+  id: string
+  company: string
+  policyNumber: string
+  type: InsuranceType
+  annualPrice?: number
+  excessAmount?: number
+  startDate?: string
+  endDate?: string
+  autoRenewal: boolean
+  agentName?: string
+  agentPhone?: string
+  agentEmail?: string
+  emergencyPhone?: string
+  coverages: string[]
+  notes?: string
+}
+
 export type TirePosition = 'front_left' | 'front_right' | 'rear_left' | 'rear_right' | 'spare'
 export type TireType = 'summer' | 'winter' | 'allseason'
 

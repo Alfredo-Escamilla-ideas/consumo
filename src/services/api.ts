@@ -1,4 +1,4 @@
-import type { ElectricCharge, FuelRefuel, Tire } from '../types'
+import type { ElectricCharge, FuelRefuel, Tire, Insurance } from '../types'
 
 const BASE = '/jaecoo7/api'
 
@@ -122,4 +122,12 @@ export async function apiUpdateTire(tire: Tire): Promise<void> {
 }
 export async function apiDeleteTire(id: string): Promise<void> {
   await req(`/tires.php?id=${id}`, { method: 'DELETE' })
+}
+
+// Insurance
+export async function apiGetInsurance(): Promise<Insurance | null> {
+  return req('/insurance.php')
+}
+export async function apiSaveInsurance(ins: Insurance): Promise<void> {
+  await req('/insurance.php', { method: 'POST', body: JSON.stringify(ins) })
 }

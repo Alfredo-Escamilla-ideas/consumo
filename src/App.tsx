@@ -10,6 +10,7 @@ import FuelRefuels from './pages/FuelRefuels'
 import Statistics from './pages/Statistics'
 import Settings from './pages/Settings'
 import Tires from './pages/Tires'
+import InsurancePage from './pages/Insurance'
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -25,6 +26,7 @@ function AppRoutes() {
           <Route path="repostajes" element={<FuelRefuels />} />
           <Route path="estadisticas" element={<Statistics />} />
           <Route path="neumaticos" element={<Tires />} />
+          <Route path="seguro" element={<InsurancePage />} />
           <Route path="configuracion" element={<Settings />} />
         </Route>
       </Routes>
