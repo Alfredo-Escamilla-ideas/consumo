@@ -12,6 +12,8 @@ import {
   formatCurrency,
   formatNumber,
   BATTERY_CAPACITY_KWH,
+  EL_MAX_RANGE_KM,
+  FUEL_MAX_RANGE_KM,
 } from '../utils/calculations'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
@@ -57,7 +59,7 @@ export default function Dashboard() {
   const kWhAtLastCharge = lastCharge ? ((lastCharge.batteryPercent ?? 100) / 100) * BATTERY_CAPACITY_KWH : null
   const kWhUsedSinceCharge = kmSinceCharge != null ? (kmSinceCharge * elEff) / 100 : 0
   const kWhRemaining = kWhAtLastCharge != null ? Math.max(0, kWhAtLastCharge - kWhUsedSinceCharge) : null
-  const elRangeKm = kWhRemaining != null ? Math.round(kWhRemaining / (elEff / 100)) : null
+  const elRangeKm = kWhRemaining != null ? Math.round((kWhRemaining / BATTERY_CAPACITY_KWH) * EL_MAX_RANGE_KM) : null
 
   const kmSinceRefuel = lastRefuel ? currentOdo - lastRefuel.odometer : null
   const litersUsedSince = kmSinceRefuel != null ? (kmSinceRefuel * avgCons) / 100 : 0
@@ -109,9 +111,7 @@ export default function Dashboard() {
                 {kmSinceCharge != null && kmSinceCharge > 0 && (
                   <p className="text-xs text-jaecoo-electric/50">{kmSinceCharge.toLocaleString('es-ES')} km desde última recarga</p>
                 )}
-                {recentElEff > 0 && (
-                  <p className="text-[10px] text-jaecoo-electric/40 mt-0.5">Basado en últimas 5 recargas</p>
-                )}
+                <p className="text-[10px] text-jaecoo-electric/40 mt-0.5">Máx. {EL_MAX_RANGE_KM} km al 100%</p>
               </>
             ) : (
               <p className="text-sm text-jaecoo-electric/50 mt-2">Sin datos de recarga</p>
@@ -134,9 +134,7 @@ export default function Dashboard() {
                 {kmSinceRefuel != null && kmSinceRefuel > 0 && (
                   <p className="text-xs text-jaecoo-fuel/50">{kmSinceRefuel.toLocaleString('es-ES')} km desde último repostaje</p>
                 )}
-                {recentFuCons > 0 && (
-                  <p className="text-[10px] text-jaecoo-fuel/40 mt-0.5">Basado en últimos 5 repostajes</p>
-                )}
+                <p className="text-[10px] text-jaecoo-fuel/40 mt-0.5">Máx. {FUEL_MAX_RANGE_KM} km con depósito lleno</p>
               </>
             ) : (
               <p className="text-sm text-jaecoo-fuel/50 mt-2">Sin datos de repostaje</p>

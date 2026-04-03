@@ -19,6 +19,12 @@ export interface StationRank {
 }
 
 export const BATTERY_CAPACITY_KWH = 18.3
+
+// ── Autonomía máxima por tipo de propulsión (valores reales del Jaecoo 7 PHEV) ──
+export const EL_MAX_RANGE_KM      = 105   // km eléctrico puro al 100% (con regen e inercia)
+export const FUEL_MAX_RANGE_KM    = 700   // km en gasolina con depósito lleno
+export const COMBINED_MAX_RANGE_KM = 1100  // km ciclo combinado eléctrico + gasolina
+
 // CO2 gasoline: 2.31 kg/L; Spain grid CO2: ~0.18 kg/kWh (2024)
 const CO2_PER_LITER = 2.31
 const CO2_PER_KWH_GRID = 0.18
@@ -469,6 +475,94 @@ export function getWayletEffectivePriceHistory(
       effective: c.kWh > 0 ? fmt2(c.totalPrice / c.kWh) : fmt2(c.pricePerKWh),
       label: c.date.substring(5),
     }))
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SALUD DE LA BATERÍA
+// Puntuación por recarga según el rango de carga utilizado.
+// Óptimo: empezar ≥20% y terminar ≤80% → 100 pts
+// Penalización lineal fuera de esos límites hasta 0% inicio / 100% fin → 0 pts
+// ═══════════════════════════════════════════════════════════════
+
+export interface ChargeHealthRecord {
+  id: string
+  date: string
+  startPct: number   // % batería estimado al inicio de la recarga
+  endPct: number     // % batería al terminar (batteryPercent registrado)
+  kWh: number
+  score: number      // 0-100
+  label: 'Óptima' | 'Buena' | 'Regular' | 'Baja'
+  color: 'emerald' | 'blue' | 'orange' | 'rose'
+}
+
+export interface BatteryHealthSummary {
+  overall: number            // 0-100 score promedio
+  label: 'Óptima' | 'Buena' | 'Regular' | 'Baja'
+  color: 'emerald' | 'blue' | 'orange' | 'rose'
+  records: ChargeHealthRecord[]
+  scoredCount: number        // recargas con batteryPercent disponible
+  totalCount: number
+}
+
+function scoreLabel(s: number): 'Óptima' | 'Buena' | 'Regular' | 'Baja' {
+  if (s >= 80) return 'Óptima'
+  if (s >= 60) return 'Buena'
+  if (s >= 35) return 'Regular'
+  return 'Baja'
+}
+
+function scoreColor(s: number): 'emerald' | 'blue' | 'orange' | 'rose' {
+  if (s >= 80) return 'emerald'
+  if (s >= 60) return 'blue'
+  if (s >= 35) return 'orange'
+  return 'rose'
+}
+
+export function calcChargeHealthScore(charge: ElectricCharge): ChargeHealthRecord | null {
+  if (charge.batteryPercent == null) return null
+
+  const endPct   = Math.min(100, Math.max(0, charge.batteryPercent))
+  const chargedPct = (charge.kWh / BATTERY_CAPACITY_KWH) * 100
+  const startPct = Math.min(100, Math.max(0, endPct - chargedPct))
+
+  // Puntuación inicio (0-50): ≥20% → 50pts, <20% → proporcional
+  const startScore = startPct >= 20 ? 50 : (startPct / 20) * 50
+
+  // Puntuación fin (0-50): ≤80% → 50pts, >80% → decrece hasta 0 en 100%
+  const endScore = endPct <= 80 ? 50 : Math.max(0, 50 * (1 - (endPct - 80) / 20))
+
+  const score = Math.round(Math.max(0, startScore + endScore))
+
+  return {
+    id: charge.id,
+    date: charge.date,
+    startPct: Math.round(startPct),
+    endPct,
+    kWh: charge.kWh,
+    score,
+    label: scoreLabel(score),
+    color: scoreColor(score),
+  }
+}
+
+export function calcBatteryHealthSummary(charges: ElectricCharge[]): BatteryHealthSummary {
+  const sorted = [...charges].sort((a, b) => b.date.localeCompare(a.date))
+  const records = sorted
+    .map(calcChargeHealthScore)
+    .filter((r): r is ChargeHealthRecord => r !== null)
+
+  const overall = records.length > 0
+    ? Math.round(records.reduce((s, r) => s + r.score, 0) / records.length)
+    : 0
+
+  return {
+    overall,
+    label: scoreLabel(overall),
+    color: scoreColor(overall),
+    records,
+    scoredCount: records.length,
+    totalCount: charges.length,
+  }
 }
 
 export function formatDate(dateStr: string): string {

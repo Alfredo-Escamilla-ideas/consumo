@@ -15,6 +15,7 @@ import {
   formatDate,
 } from '../utils/calculations'
 import StatCard from '../components/StatCard'
+import BatteryHealth from '../components/BatteryHealth'
 import {
   Zap, Fuel, Euro, Route, Leaf, TrendingUp, BarChart3, Droplets, Battery, Trophy, MapPin, Navigation
 } from 'lucide-react'
@@ -84,6 +85,7 @@ export default function Statistics() {
     { href: '#trayectos',  label: 'Trayectos' },
     { href: '#rankings',   label: 'Rankings' },
     { href: '#detalle',    label: 'Detalle' },
+    { href: '#bateria',    label: 'Batería' },
   ]
 
   return (
@@ -515,6 +517,16 @@ export default function Statistics() {
           </div>
         </div>
       </div>
+
+      {/* Battery Health */}
+      {electricCharges.length > 0 && (
+        <div id="bateria" className="scroll-mt-28">
+          <h2 className="text-sm font-semibold text-jaecoo-primary mb-3 flex items-center gap-2">
+            <Battery size={16} className="text-jaecoo-electric" /> Salud de la batería
+          </h2>
+          <BatteryHealth charges={electricCharges} />
+        </div>
+      )}
     </div>
   )
 }
