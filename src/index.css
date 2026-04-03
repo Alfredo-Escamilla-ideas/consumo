@@ -45,23 +45,25 @@
 
 /* ── MODO CLARO ── */
 html.light {
-  --j-base:           #f8fafc;
-  --j-surface:        #f1f5f9;
-  --j-card:           #ffffff;
-  --j-elevated:       #f1f5f9;
+  /* Fondos: azul-pizarra suave, sin blanco puro */
+  --j-base:           #e8edf5;
+  --j-surface:        #dde4ef;
+  --j-card:           #eef2f8;
+  --j-elevated:       #d4dce9;
 
-  --j-border:         rgba(0, 0, 0, 0.08);
-  --j-border-strong:  rgba(0, 0, 0, 0.15);
+  --j-border:         rgba(0, 0, 0, 0.10);
+  --j-border-strong:  rgba(0, 0, 0, 0.20);
 
-  --j-text-primary:   #0f172a;
-  --j-text-secondary: #334155;
-  --j-text-muted:     #64748b;
+  /* Texto: primario casi negro, secundario azul oscuro, muted legible */
+  --j-text-primary:   #0d1523;
+  --j-text-secondary: #1e2d45;
+  --j-text-muted:     #3d5068;
 
-  --j-electric-dim:   rgba(34, 211, 238, 0.14);
-  --j-fuel-dim:       rgba(251, 146, 60, 0.14);
+  --j-electric-dim:   rgba(34, 211, 238, 0.18);
+  --j-fuel-dim:       rgba(251, 146, 60, 0.18);
 
-  --j-shadow-card:     0 1px 3px rgba(0,0,0,0.08), 0 1px 0 rgba(0,0,0,0.03);
-  --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.10);
+  --j-shadow-card:     0 1px 4px rgba(0,0,0,0.10), 0 1px 0 rgba(0,0,0,0.05);
+  --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.13);
 }
 
 /* ═══════════════════════════════════════════════════════════════
