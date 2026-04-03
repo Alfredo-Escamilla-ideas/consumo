@@ -62,7 +62,7 @@ export default function StatCard({ title, value, subtitle, icon: Icon, color, tr
         <p className="text-[11px] font-semibold text-jaecoo-muted uppercase tracking-widest truncate">
           {title}
         </p>
-        <p className={`text-2xl font-bold mt-0.5 leading-none ${c.value}`}>
+        <p className={`text-xl font-bold mt-0.5 leading-tight break-words min-w-0 ${c.value}`}>
           {value}
         </p>
         {subtitle && (
