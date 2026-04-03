@@ -10,6 +10,7 @@ const titles: Record<string, string> = {
   '/recargas':      'Recargas eléctricas',
   '/repostajes':    'Repostajes de gasolina',
   '/estadisticas':  'Estadísticas',
+  '/neumaticos':    'Neumáticos',
   '/configuracion': 'Configuración',
 }
 

@@ -9,6 +9,7 @@ import ElectricCharges from './pages/ElectricCharges'
 import FuelRefuels from './pages/FuelRefuels'
 import Statistics from './pages/Statistics'
 import Settings from './pages/Settings'
+import Tires from './pages/Tires'
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth()
@@ -23,6 +24,7 @@ function AppRoutes() {
           <Route path="recargas" element={<ElectricCharges />} />
           <Route path="repostajes" element={<FuelRefuels />} />
           <Route path="estadisticas" element={<Statistics />} />
+          <Route path="neumaticos" element={<Tires />} />
           <Route path="configuracion" element={<Settings />} />
         </Route>
       </Routes>

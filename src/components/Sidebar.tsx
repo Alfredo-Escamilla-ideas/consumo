@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Zap, Fuel, BarChart3, Settings,
-  Menu, X, Car,
+  Menu, X, Car, Disc3,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -14,6 +14,7 @@ const links = [
   { to: '/recargas',      icon: Zap,             label: 'Recargas'      },
   { to: '/repostajes',    icon: Fuel,            label: 'Repostajes'    },
   { to: '/estadisticas',  icon: BarChart3,        label: 'Estadísticas'  },
+  { to: '/neumaticos',    icon: Disc3,            label: 'Neumáticos'    },
   { to: '/configuracion', icon: Settings,         label: 'Configuración' },
 ]
 

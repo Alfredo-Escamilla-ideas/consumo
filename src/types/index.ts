@@ -1,13 +1,19 @@
+export type DrivingMode = 'city' | 'highway' | 'mixed'
+
 export interface ElectricCharge {
   id: string
-  date: string // ISO date string YYYY-MM-DD
+  date: string           // ISO date string YYYY-MM-DD
   kWh: number
-  totalPrice: number // € total pagado
-  pricePerKWh: number // €/kWh según Wailet
-  odometerStart: number // km al salir de la última carga (batería llena)
-  odometerEnd: number // km al llegar a esta carga (batería baja)
+  pricePerKWh: number    // tarifa €/kWh en el punto de carga
+  totalPriceGross: number // coste bruto = kWh × tarifa
+  totalPrice: number     // dinero real pagado (gross − saldo Waylet usado)
+  wayletBefore?: number  // saldo Waylet antes de la recarga
+  wayletAfter?: number   // saldo Waylet después de la recarga
+  odometer: number       // km en el momento de la recarga
   stationName: string
   stationAddress: string
+  batteryPercent?: number  // % batería al terminar la recarga
+  drivingMode?: DrivingMode
   notes?: string
 }
 
@@ -20,19 +26,33 @@ export interface FuelRefuel {
   odometer: number // km en el momento del repostaje
   stationName: string
   stationAddress: string
+  drivingMode?: DrivingMode // condiciones del trayecto consumido
+  notes?: string
+}
+
+export type TirePosition = 'front_left' | 'front_right' | 'rear_left' | 'rear_right' | 'spare'
+export type TireType = 'summer' | 'winter' | 'allseason'
+
+export interface Tire {
+  id: string
+  brand: string
+  model: string
+  type: TireType
+  size: string
+  position: TirePosition
+  purchaseDate: string
+  purchasePrice?: number
+  odometerAtInstall: number
+  estimatedLifeKm: number
+  treadDepthMm?: number
+  estimatedChangeDate?: string
+  dotCode?: string
   notes?: string
 }
 
 export interface AppData {
   electricCharges: ElectricCharge[]
   fuelRefuels: FuelRefuel[]
-}
-
-export interface GitHubState {
-  sha: string | null
-  lastSynced: Date | null
-  isSyncing: boolean
-  syncError: string | null
 }
 
 export interface ElectricStats {
