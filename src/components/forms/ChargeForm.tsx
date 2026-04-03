@@ -275,7 +275,7 @@ function WayletRow({ label, value, sub, valueColor = 'text-jaecoo-secondary' }: 
     <div className="flex justify-between items-center px-3 py-2">
       <div>
         <span className="text-xs text-jaecoo-muted">{label}</span>
-        {sub && <p className="text-[10px] text-jaecoo-muted/70">{sub}</p>}
+        {sub && <p className="text-[10px] text-jaecoo-muted">{sub}</p>}
       </div>
       <span className={`text-xs ${valueColor}`}>{value}</span>
     </div>

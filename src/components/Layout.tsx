@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { Sun, Moon } from 'lucide-react'
 import Sidebar, { MenuButton } from './Sidebar'
 import SyncStatus from './SyncStatus'
+import { useTheme } from '../context/ThemeContext'
 
 const titles: Record<string, string> = {
   '/':              'Panel',
@@ -15,6 +17,7 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const title = titles[location.pathname] ?? 'Consumo PHEV'
+  const { theme, toggle } = useTheme()
 
   return (
     <div className="min-h-screen bg-jaecoo-base flex">
@@ -27,6 +30,14 @@ export default function Layout() {
           <h1 className="text-base font-semibold text-jaecoo-primary flex-1 truncate tracking-wide">
             {title}
           </h1>
+          {/* Theme toggle */}
+          <button
+            onClick={toggle}
+            aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="p-2 rounded-xl text-jaecoo-muted hover:text-jaecoo-secondary hover:bg-jaecoo-elevated transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           <SyncStatus />
         </header>
 

@@ -6,6 +6,7 @@
    JAECOO 7 — Design System Tokens
    Inspirado en la pantalla de 14.8" del vehículo
    ═══════════════════════════════════════════════════════════════ */
+/* ── MODO OSCURO (por defecto) ── */
 :root {
   /* Fondos */
   --j-base:           #080c14;
@@ -42,6 +43,27 @@
   --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.6);
 }
 
+/* ── MODO CLARO ── */
+html.light {
+  --j-base:           #f8fafc;
+  --j-surface:        #f1f5f9;
+  --j-card:           #ffffff;
+  --j-elevated:       #f1f5f9;
+
+  --j-border:         rgba(0, 0, 0, 0.08);
+  --j-border-strong:  rgba(0, 0, 0, 0.15);
+
+  --j-text-primary:   #0f172a;
+  --j-text-secondary: #334155;
+  --j-text-muted:     #64748b;
+
+  --j-electric-dim:   rgba(34, 211, 238, 0.14);
+  --j-fuel-dim:       rgba(251, 146, 60, 0.14);
+
+  --j-shadow-card:     0 1px 3px rgba(0,0,0,0.08), 0 1px 0 rgba(0,0,0,0.03);
+  --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.10);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    BASE GLOBAL
    ═══════════════════════════════════════════════════════════════ */
@@ -72,6 +94,11 @@
   input[type='date']::-webkit-calendar-picker-indicator {
     filter: invert(0.7) opacity(0.6);
     cursor: pointer;
+  }
+
+  /* En modo claro el icono ya es visible — no invertir */
+  html.light input[type='date']::-webkit-calendar-picker-indicator {
+    filter: opacity(0.5);
   }
 }
 
@@ -146,9 +173,10 @@ a:focus-visible,
   background: var(--j-surface);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--j-border-strong);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--j-text-muted);
+  opacity: 0.4;
 }

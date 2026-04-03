@@ -24,43 +24,41 @@ export default {
 
         // ── JAECOO Palette — inspirada en la pantalla 14.8" del coche ──
         jaecoo: {
-          // Fondos (de más oscuro a más elevado)
-          base:           '#080c14',   // fondo global
-          surface:        '#0e1520',   // sidebar / header
-          card:           '#141c2e',   // tarjetas
-          elevated:       '#1b2438',   // inputs / elementos elevados
+          // Fondos — usan CSS vars para soportar dark/light mode
+          base:            'var(--j-base)',
+          surface:         'var(--j-surface)',
+          card:            'var(--j-card)',
+          elevated:        'var(--j-elevated)',
 
-          // Bordes semitransparentes (rgba — no usan modificador de opacidad)
-          border:         'rgba(255,255,255,0.07)',
-          'border-strong': 'rgba(255,255,255,0.14)',
+          // Bordes — CSS vars (no usan modificador de opacidad)
+          border:          'var(--j-border)',
+          'border-strong': 'var(--j-border-strong)',
 
-          // Tipografía
-          primary:        '#e2e8f0',   // texto principal
-          secondary:      '#94a3b8',   // texto secundario
-          muted:          '#475569',   // texto muy atenuado
+          // Tipografía — CSS vars
+          primary:         'var(--j-text-primary)',
+          secondary:       'var(--j-text-secondary)',
+          muted:           'var(--j-text-muted)',
 
-          // Energía eléctrica — cyan
-          electric:       '#22d3ee',
-          'electric-dim': 'rgba(34,211,238,0.12)',
+          // Dim backgrounds — CSS vars (rgba precalculados, sin modificador)
+          'electric-dim':  'var(--j-electric-dim)',
+          'fuel-dim':      'var(--j-fuel-dim)',
 
-          // Gasolina — ámbar/naranja
-          fuel:           '#fb923c',
-          'fuel-dim':     'rgba(251,146,60,0.12)',
-
-          // Acciones UI
-          accent:         '#3b82f6',   // azul acción
-          success:        '#10b981',   // verde positivo
-          danger:         '#f87171',   // rojo error/eliminar
+          // Acentos — hex fijos (se usan con modificadores de opacidad /20, /10…)
+          electric:        '#22d3ee',
+          fuel:            '#fb923c',
+          accent:          '#3b82f6',
+          success:         '#10b981',
+          danger:          '#f87171',
         },
       },
 
       // ── Sombras con efecto glow ──────────────────────────────────────────
       boxShadow: {
-        'j-card':     '0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-        'j-elevated': '0 4px 24px rgba(0,0,0,0.6)',
-        'j-electric': '0 0 24px rgba(34,211,238,0.25), 0 2px 8px rgba(0,0,0,0.5)',
-        'j-fuel':     '0 0 24px rgba(251,146,60,0.25),  0 2px 8px rgba(0,0,0,0.5)',
-        'j-accent':   '0 0 24px rgba(59,130,246,0.3),   0 2px 8px rgba(0,0,0,0.5)',
+        'j-card':     'var(--j-shadow-card)',
+        'j-elevated': 'var(--j-shadow-elevated)',
+        'j-electric': '0 0 24px rgba(34,211,238,0.25), 0 2px 8px rgba(0,0,0,0.4)',
+        'j-fuel':     '0 0 24px rgba(251,146,60,0.25),  0 2px 8px rgba(0,0,0,0.4)',
+        'j-accent':   '0 0 24px rgba(59,130,246,0.3),   0 2px 8px rgba(0,0,0,0.4)',
       },
 
       // ── Gradientes de fondo ──────────────────────────────────────────────

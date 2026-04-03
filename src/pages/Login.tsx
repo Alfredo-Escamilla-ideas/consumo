@@ -143,7 +143,7 @@ export default function Login() {
                   <p className="text-xs font-semibold text-jaecoo-muted uppercase tracking-wide">
                     Estado inicial del vehículo
                   </p>
-                  <p className="text-xs text-jaecoo-muted/70 -mt-1">
+                  <p className="text-xs text-jaecoo-muted -mt-1">
                     Se recomienda registrar con batería al 100% y depósito lleno para mayor precisión.
                   </p>
 
