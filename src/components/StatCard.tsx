@@ -47,33 +47,34 @@ export default function StatCard({ title, value, subtitle, icon: Icon, color, tr
   const c = colorMap[color]
   return (
     <div className={`
-      bg-jaecoo-card rounded-2xl border p-5
-      flex items-start gap-4
+      bg-jaecoo-card rounded-2xl border p-4
+      flex flex-col gap-2
       shadow-j-card transition-all duration-200
       ${c.card}
     `}>
+      {/* Título */}
+      <p className="text-[11px] font-semibold text-jaecoo-muted uppercase tracking-widest truncate">
+        {title}
+      </p>
+
       {/* Icono */}
-      <div className={`rounded-xl p-2.5 ${c.icon} shrink-0`}>
-        <Icon size={20} />
+      <div className={`rounded-xl p-2 self-start ${c.icon}`}>
+        <Icon size={18} />
       </div>
 
-      {/* Contenido */}
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold text-jaecoo-muted uppercase tracking-widest truncate">
-          {title}
+      {/* Valor */}
+      <p className={`text-lg font-bold leading-tight ${c.value}`}>
+        {value}
+      </p>
+
+      {subtitle && (
+        <p className="text-xs text-jaecoo-muted -mt-1">{subtitle}</p>
+      )}
+      {trend && (
+        <p className={`text-xs font-semibold ${trend.positive ? 'text-emerald-400' : 'text-rose-400'}`}>
+          {trend.positive ? '↑' : '↓'} {trend.value}
         </p>
-        <p className={`text-xl font-bold mt-0.5 leading-tight break-words min-w-0 ${c.value}`}>
-          {value}
-        </p>
-        {subtitle && (
-          <p className="text-xs text-jaecoo-muted mt-1">{subtitle}</p>
-        )}
-        {trend && (
-          <p className={`text-xs mt-1 font-semibold ${trend.positive ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {trend.positive ? '↑' : '↓'} {trend.value}
-          </p>
-        )}
-      </div>
+      )}
     </div>
   )
 }
