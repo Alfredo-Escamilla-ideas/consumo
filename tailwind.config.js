@@ -43,12 +43,12 @@ export default {
           'electric-dim':  'var(--j-electric-dim)',
           'fuel-dim':      'var(--j-fuel-dim)',
 
-          // Acentos — hex fijos (se usan con modificadores de opacidad /20, /10…)
-          electric:        '#22d3ee',
-          fuel:            '#fb923c',
-          accent:          '#3b82f6',
-          success:         '#10b981',
-          danger:          '#f87171',
+          // Acentos — RGB vars (soportan /20, /10 y cambian en light mode)
+          electric:        'rgb(var(--j-electric-rgb) / <alpha-value>)',
+          fuel:            'rgb(var(--j-fuel-rgb) / <alpha-value>)',
+          accent:          'rgb(var(--j-accent-rgb) / <alpha-value>)',
+          success:         'rgb(var(--j-success-rgb) / <alpha-value>)',
+          danger:          'rgb(var(--j-danger-rgb) / <alpha-value>)',
         },
       },
 

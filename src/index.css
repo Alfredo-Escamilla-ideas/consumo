@@ -38,6 +38,13 @@
   --j-success:        #10b981;
   --j-danger:         #f87171;
 
+  /* Acentos — canales RGB para soportar modificadores de opacidad */
+  --j-electric-rgb:    34 211 238;   /* #22d3ee */
+  --j-fuel-rgb:        251 146 60;   /* #fb923c */
+  --j-accent-rgb:      59 130 246;   /* #3b82f6 */
+  --j-success-rgb:     16 185 129;   /* #10b981 */
+  --j-danger-rgb:      248 113 113;  /* #f87171 */
+
   /* Sombras */
   --j-shadow-card:     0 1px 3px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
   --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.6);
@@ -59,8 +66,15 @@ html.light {
   --j-text-secondary: #1e2d45;
   --j-text-muted:     #3d5068;
 
-  --j-electric-dim:   rgba(34, 211, 238, 0.18);
-  --j-fuel-dim:       rgba(251, 146, 60, 0.18);
+  --j-electric-dim:   rgba(8, 145, 178, 0.15);
+  --j-fuel-dim:       rgba(194, 65, 12, 0.12);
+
+  /* Acentos oscuros para contraste en fondo claro */
+  --j-electric-rgb:    8 145 178;    /* #0891b2 — cyan-600 */
+  --j-fuel-rgb:        194 65 12;    /* #c2410c — orange-700 */
+  --j-accent-rgb:      37 99 235;    /* #2563eb — blue-600 */
+  --j-success-rgb:     5 150 105;    /* #059669 — emerald-600 */
+  --j-danger-rgb:      220 38 38;    /* #dc2626 — red-600 */
 
   --j-shadow-card:     0 1px 4px rgba(0,0,0,0.10), 0 1px 0 rgba(0,0,0,0.05);
   --j-shadow-elevated: 0 4px 24px rgba(0,0,0,0.13);
