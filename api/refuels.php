@@ -10,8 +10,8 @@ $db = getDB();
 
 if ($method === 'GET') {
     $st = $db->prepare(
-        'SELECT id, date, liters, total_price, price_per_liter,
-                odometer, station_name, station_address, notes
+        'SELECT id, date, liters, liters_in_tank, total_price, price_per_liter,
+                odometer, station_name, station_address, driving_mode, notes
          FROM fuel_refuels WHERE vehicle_id = ? ORDER BY date DESC, created_at DESC'
     );
     $st->execute([$vid]);
@@ -21,11 +21,13 @@ if ($method === 'GET') {
             'id'             => $r['id'],
             'date'           => $r['date'],
             'liters'         => (float)$r['liters'],
+            'litersInTank'   => $r['liters_in_tank'] !== null ? (float)$r['liters_in_tank'] : null,
             'totalPrice'     => (float)$r['total_price'],
             'pricePerLiter'  => (float)$r['price_per_liter'],
             'odometer'       => (int)$r['odometer'],
             'stationName'    => $r['station_name'],
             'stationAddress' => $r['station_address'],
+            'drivingMode'    => $r['driving_mode'],
             'notes'          => $r['notes'],
         ];
     }, $rows);
@@ -37,12 +39,15 @@ if ($method === 'POST') {
     $id = $b['id'] ?? bin2hex(random_bytes(16));
     $db->prepare(
         'INSERT INTO fuel_refuels
-         (id, vehicle_id, date, liters, total_price, price_per_liter, odometer, station_name, station_address, notes)
-         VALUES (?,?,?,?,?,?,?,?,?,?)'
+         (id, vehicle_id, date, liters, liters_in_tank, total_price, price_per_liter, odometer, station_name, station_address, driving_mode, notes)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
     )->execute([
         $id, $vid,
-        $b['date'], $b['liters'], $b['totalPrice'], $b['pricePerLiter'],
+        $b['date'], $b['liters'],
+        isset($b['litersInTank']) ? (float)$b['litersInTank'] : null,
+        $b['totalPrice'], $b['pricePerLiter'],
         $b['odometer'], $b['stationName'], $b['stationAddress'],
+        $b['drivingMode'] ?? null,
         $b['notes'] ?? null,
     ]);
     json(['ok' => true, 'id' => $id], 201);
@@ -58,12 +63,15 @@ if ($method === 'PUT') {
 
     $db->prepare(
         'UPDATE fuel_refuels SET
-         date=?, liters=?, total_price=?, price_per_liter=?,
-         odometer=?, station_name=?, station_address=?, notes=?
+         date=?, liters=?, liters_in_tank=?, total_price=?, price_per_liter=?,
+         odometer=?, station_name=?, station_address=?, driving_mode=?, notes=?
          WHERE id=? AND vehicle_id=?'
     )->execute([
-        $b['date'], $b['liters'], $b['totalPrice'], $b['pricePerLiter'],
+        $b['date'], $b['liters'],
+        isset($b['litersInTank']) ? (float)$b['litersInTank'] : null,
+        $b['totalPrice'], $b['pricePerLiter'],
         $b['odometer'], $b['stationName'], $b['stationAddress'],
+        $b['drivingMode'] ?? null,
         $b['notes'] ?? null,
         $id, $vid,
     ]);

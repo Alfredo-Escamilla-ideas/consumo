@@ -24,6 +24,7 @@ export interface FuelRefuel {
   totalPrice: number // € total pagado
   pricePerLiter: number // €/litro
   odometer: number // km en el momento del repostaje
+  litersInTank?: number // litros que ya había en el depósito antes de repostar
   stationName: string
   stationAddress: string
   drivingMode?: DrivingMode // condiciones del trayecto consumido

@@ -15,6 +15,7 @@ interface FuelFormProps {
 const EMPTY = {
   date: new Date().toISOString().substring(0, 10),
   liters: '',
+  litersInTank: '',
   totalPrice: '',
   pricePerLiter: '',
   odometer: '',
@@ -32,6 +33,7 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
       ? {
           date: initial.date,
           liters: String(initial.liters),
+          litersInTank: initial.litersInTank != null ? String(initial.litersInTank) : '',
           totalPrice: String(initial.totalPrice),
           pricePerLiter: String(initial.pricePerLiter),
           odometer: String(initial.odometer),
@@ -93,6 +95,7 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
       odometer: parseFloat(f.odometer),
       stationName: f.stationName,
       stationAddress: f.stationAddress,
+      litersInTank: f.litersInTank ? parseFloat(f.litersInTank) : undefined,
       drivingMode: drivingMode as DrivingMode,
       notes: f.notes || undefined,
     })
@@ -125,8 +128,11 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
         <Field label="Fecha" error={errors.date}>
           <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={inp(errors.date, 'orange')} />
         </Field>
-        <Field label="Litros echados" error={errors.liters}>
+        <Field label="Litros repostados" error={errors.liters}>
           <input type="number" step="0.01" min="0" placeholder="ej. 35,5" value={f.liters} onChange={e => set('liters', e.target.value)} className={inp(errors.liters, 'orange')} />
+        </Field>
+        <Field label="Gasolina en depósito (L)">
+          <input type="number" step="0.01" min="0" max="60" placeholder="ej. 10" value={f.litersInTank} onChange={e => set('litersInTank', e.target.value)} className={inp(undefined, 'orange')} />
         </Field>
         <Field label="Precio total (€)" error={errors.totalPrice}>
           <input type="number" step="0.01" min="0" placeholder="ej. 58,40" value={f.totalPrice} onChange={e => set('totalPrice', e.target.value)} className={inp(errors.totalPrice, 'orange')} />

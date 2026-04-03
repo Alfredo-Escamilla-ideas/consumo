@@ -64,7 +64,8 @@ export default function Dashboard() {
 
   const kmSinceRefuel = lastRefuel ? currentOdo - lastRefuel.odometer : null
   const litersUsedSince = kmSinceRefuel != null ? (kmSinceRefuel * avgCons) / 100 : 0
-  const litersRemaining = lastRefuel ? Math.max(0, lastRefuel.liters - litersUsedSince) : null
+  const totalLitersAtRefuel = lastRefuel ? lastRefuel.liters + (lastRefuel.litersInTank ?? 0) : null
+  const litersRemaining = totalLitersAtRefuel != null ? Math.max(0, totalLitersAtRefuel - litersUsedSince) : null
   const fuelRangeKm = litersRemaining != null
     ? Math.round((litersRemaining / FUEL_TANK_LITERS) * FUEL_MAX_RANGE_KM)
     : null
