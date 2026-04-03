@@ -98,23 +98,23 @@ export default function Dashboard() {
           <Link to="/recargas" className="bg-jaecoo-electric-dim border border-jaecoo-electric/20 hover:border-jaecoo-electric/40 hover:shadow-j-electric rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <BatteryCharging size={16} className="text-jaecoo-electric" />
-              <p className="text-xs text-jaecoo-electric/70 font-semibold uppercase tracking-wide">Autonomía eléctrica</p>
-              <ChevronRight size={13} className="text-jaecoo-electric/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <p className="text-xs text-jaecoo-electric font-bold uppercase tracking-wide">Autonomía eléctrica</p>
+              <ChevronRight size={13} className="text-jaecoo-electric ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             {elRangeKm !== null ? (
               <>
-                <p className="text-3xl font-bold text-jaecoo-electric">{elRangeKm.toLocaleString('es-ES')} <span className="text-lg font-normal text-jaecoo-electric/60">km</span></p>
-                <p className="text-xs text-jaecoo-electric/60 mt-1">
+                <p className="text-3xl font-bold text-jaecoo-electric">{elRangeKm.toLocaleString('es-ES')} <span className="text-lg font-normal text-jaecoo-electric">km</span></p>
+                <p className="text-xs text-jaecoo-secondary mt-1">
                   {kWhRemaining != null ? `${formatNumber(kWhRemaining)} kWh restantes` : ''}
                   {lastCharge?.batteryPercent != null ? ` · última carga al ${lastCharge.batteryPercent}%` : ''}
                 </p>
                 {kmSinceCharge != null && kmSinceCharge > 0 && (
-                  <p className="text-xs text-jaecoo-electric/50">{kmSinceCharge.toLocaleString('es-ES')} km desde última recarga</p>
+                  <p className="text-xs text-jaecoo-secondary">{kmSinceCharge.toLocaleString('es-ES')} km desde última recarga</p>
                 )}
-                <p className="text-[10px] text-jaecoo-electric/40 mt-0.5">Máx. {EL_MAX_RANGE_KM} km al 100%</p>
+                <p className="text-[10px] text-jaecoo-muted mt-0.5">Máx. {EL_MAX_RANGE_KM} km al 100%</p>
               </>
             ) : (
-              <p className="text-sm text-jaecoo-electric/50 mt-2">Sin datos de recarga</p>
+              <p className="text-sm text-jaecoo-secondary mt-2">Sin datos de recarga</p>
             )}
           </Link>
 
@@ -122,40 +122,40 @@ export default function Dashboard() {
           <Link to="/repostajes" className="bg-jaecoo-fuel-dim border border-jaecoo-fuel/20 hover:border-jaecoo-fuel/40 hover:shadow-j-fuel rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <Gauge size={16} className="text-jaecoo-fuel" />
-              <p className="text-xs text-jaecoo-fuel/70 font-semibold uppercase tracking-wide">Autonomía gasolina</p>
-              <ChevronRight size={13} className="text-jaecoo-fuel/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <p className="text-xs text-jaecoo-fuel font-bold uppercase tracking-wide">Autonomía gasolina</p>
+              <ChevronRight size={13} className="text-jaecoo-fuel ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             {fuelRangeKm !== null ? (
               <>
-                <p className="text-3xl font-bold text-jaecoo-fuel">{fuelRangeKm.toLocaleString('es-ES')} <span className="text-lg font-normal text-jaecoo-fuel/60">km</span></p>
-                <p className="text-xs text-jaecoo-fuel/60 mt-1">
+                <p className="text-3xl font-bold text-jaecoo-fuel">{fuelRangeKm.toLocaleString('es-ES')} <span className="text-lg font-normal text-jaecoo-fuel">km</span></p>
+                <p className="text-xs text-jaecoo-secondary mt-1">
                   {lastRefuel ? `Último repostaje: ${formatDate(lastRefuel.date)}` : ''}
                 </p>
                 {kmSinceRefuel != null && kmSinceRefuel > 0 && (
-                  <p className="text-xs text-jaecoo-fuel/50">{kmSinceRefuel.toLocaleString('es-ES')} km desde último repostaje</p>
+                  <p className="text-xs text-jaecoo-secondary">{kmSinceRefuel.toLocaleString('es-ES')} km desde último repostaje</p>
                 )}
-                <p className="text-[10px] text-jaecoo-fuel/40 mt-0.5">Máx. {FUEL_MAX_RANGE_KM} km con depósito lleno</p>
+                <p className="text-[10px] text-jaecoo-muted mt-0.5">Máx. {FUEL_MAX_RANGE_KM} km con depósito lleno</p>
               </>
             ) : (
-              <p className="text-sm text-jaecoo-fuel/50 mt-2">Sin datos de repostaje</p>
+              <p className="text-sm text-jaecoo-secondary mt-2">Sin datos de repostaje</p>
             )}
           </Link>
 
           {/* Savings */}
           <Link to="/estadisticas" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-[0_0_24px_rgba(16,185,129,0.2)] rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
-              <PiggyBank size={16} className="text-emerald-400" />
-              <p className="text-xs text-emerald-400/70 font-semibold uppercase tracking-wide">Ahorro eléctrico</p>
-              <ChevronRight size={13} className="text-emerald-400/50 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <PiggyBank size={16} className="text-jaecoo-success" />
+              <p className="text-xs text-jaecoo-success font-bold uppercase tracking-wide">Ahorro eléctrico</p>
+              <ChevronRight size={13} className="text-jaecoo-success ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             {savedVsAllFuel > 0 ? (
               <>
-                <p className="text-3xl font-bold text-emerald-400">{formatCurrency(savedVsAllFuel)}</p>
-                <p className="text-xs text-emerald-400/60 mt-1">vs {formatNumber(elStats.totalKm, 0)} km en gasolina</p>
-                <p className="text-xs text-emerald-400/50">{formatNumber(elStats.avgCostPerKm, 3)} vs {formatNumber(fuStats.avgCostPerKm, 3)} €/km</p>
+                <p className="text-3xl font-bold text-jaecoo-success">{formatCurrency(savedVsAllFuel)}</p>
+                <p className="text-xs text-jaecoo-secondary mt-1">vs {formatNumber(elStats.totalKm, 0)} km en gasolina</p>
+                <p className="text-xs text-jaecoo-muted">{formatNumber(elStats.avgCostPerKm, 3)} vs {formatNumber(fuStats.avgCostPerKm, 3)} €/km</p>
               </>
             ) : (
-              <p className="text-sm text-emerald-400/50 mt-2">Más datos para calcular ahorro</p>
+              <p className="text-sm text-jaecoo-secondary mt-2">Más datos para calcular ahorro</p>
             )}
           </Link>
         </div>
