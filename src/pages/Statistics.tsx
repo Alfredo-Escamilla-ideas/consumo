@@ -94,13 +94,13 @@ export default function Statistics() {
       <nav className="sticky top-16 z-10 -mx-4 md:-mx-6 px-4 md:px-6 bg-jaecoo-surface backdrop-blur border-b border-jaecoo-border">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide py-2 max-w-6xl">
           {NAV_SECTIONS.map(s => (
-            <a
+            <button
               key={s.href}
-              href={s.href}
+              onClick={() => document.getElementById(s.href.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium text-jaecoo-muted hover:bg-jaecoo-elevated hover:text-jaecoo-secondary transition-colors"
             >
               {s.label}
-            </a>
+            </button>
           ))}
         </div>
       </nav>
