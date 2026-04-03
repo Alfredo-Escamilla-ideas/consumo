@@ -11,6 +11,7 @@ const titles: Record<string, string> = {
   '/repostajes':    'Repostajes de gasolina',
   '/estadisticas':  'Estadísticas',
   '/neumaticos':    'Neumáticos',
+  '/taller':        'Taller',
   '/seguro':        'Seguro',
   '/configuracion': 'Configuración',
 }

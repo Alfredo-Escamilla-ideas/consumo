@@ -30,6 +30,47 @@ export interface FuelRefuel {
   notes?: string
 }
 
+// ── Garage ──────────────────────────────────────────────────────────────────
+export type RepairType   = 'mechanical' | 'electrical' | 'both' | 'bodywork' | 'other'
+export type RepairStatus = 'open' | 'in_repair' | 'resolved' | 'warranty'
+
+export interface Repair {
+  id: string
+  date: string
+  odometer?: number
+  type: RepairType
+  status: RepairStatus
+  description: string
+  diagnosis?: string
+  workshop?: string
+  workshopPhone?: string
+  partsAffected: string[]
+  estimatePrice?: number
+  finalPrice?: number
+  repairDays?: number
+  warrantyClaim: boolean
+  invoiceNumber?: string
+  notes?: string
+}
+
+export type MaintenanceType = 'annual' | 'oil' | 'brakes' | 'tires' | 'battery' | 'full' | 'other'
+export type MaintenanceStatus = 'done' | 'pending'
+
+export interface MaintenanceService {
+  id: string
+  date: string
+  odometer?: number
+  nextDate?: string
+  nextOdometer?: number
+  type: MaintenanceType
+  workshop?: string
+  workshopPhone?: string
+  price?: number
+  itemsChecked: string[]
+  notes?: string
+  status: MaintenanceStatus
+}
+
 export type InsuranceType = 'third_party' | 'third_party_plus' | 'comprehensive_excess' | 'comprehensive'
 
 export interface Insurance {
