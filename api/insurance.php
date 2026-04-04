@@ -10,7 +10,7 @@ $db = getDB();
 
 try {
     $db->exec("CREATE TABLE IF NOT EXISTS insurance (
-      id VARCHAR(32) PRIMARY KEY,
+      id VARCHAR(36) PRIMARY KEY,
       vehicle_id INT NOT NULL UNIQUE,
       company VARCHAR(100) NOT NULL,
       policy_number VARCHAR(100) NOT NULL DEFAULT '',
@@ -29,6 +29,8 @@ try {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       INDEX idx_vehicle (vehicle_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    // Ampliar id a VARCHAR(36) si fue creado con 32
+    $db->exec("ALTER TABLE insurance MODIFY COLUMN id VARCHAR(36) NOT NULL");
 } catch (PDOException $e) {
     err('Error al inicializar tabla: ' . $e->getMessage(), 500);
 }
