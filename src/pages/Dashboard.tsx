@@ -222,7 +222,7 @@ export default function Dashboard() {
       {insurance !== undefined && (() => {
         if (!insurance) {
           return (
-            <Link to="/seguro" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
+            <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
               <div className="flex items-center gap-2 mb-1">
                 <Shield size={15} className="text-emerald-400" />
                 <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
@@ -236,7 +236,7 @@ export default function Dashboard() {
         const TypeIcon = typeInfo.icon
         const expiry = insExpiryBadge(insurance.endDate)
         return (
-          <Link to="/seguro" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
+          <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <TypeIcon size={15} className="text-emerald-400" />
               <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
