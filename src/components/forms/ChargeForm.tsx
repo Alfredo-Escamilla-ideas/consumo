@@ -184,7 +184,7 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
           <input type="number" step="0.01" min="0" placeholder="ej. 18,5" value={f.kWh} onChange={e => set('kWh', e.target.value)} className={inp(errors.kWh)} />
         </Field>
         <Field label="Precio del kWh — tarifa (€)" error={errors.pricePerKWh}>
-          <input type="number" step="0.001" min="0.0000000001" max="2" placeholder="ej. 0,48" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={inp(errors.pricePerKWh)} />
+          <input type="number" step="any" min="0" max="2" placeholder="ej. 0,48" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={inp(errors.pricePerKWh)} />
         </Field>
         <Field label="% batería al terminar la recarga">
           <div className="relative">
