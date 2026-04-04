@@ -53,6 +53,8 @@ function mapInsurance(array $r): array {
     ];
 }
 
+try {
+
 if ($method === 'GET') {
     $st = $db->prepare('SELECT * FROM insurance WHERE vehicle_id = ?');
     $st->execute([$vid]);
@@ -74,7 +76,7 @@ if ($method === 'POST' || $method === 'PUT') {
             'UPDATE insurance SET company=?, policy_number=?, type=?, annual_price=?,
              excess_amount=?, start_date=?, end_date=?, auto_renewal=?,
              agent_name=?, agent_phone=?, agent_email=?, emergency_phone=?,
-             coverages=?, notes=?, updated_at=NOW()
+             coverages=?, notes=?
              WHERE vehicle_id=?'
         )->execute([
             $b['company'], $b['policyNumber'] ?? '', $b['type'] ?? 'comprehensive',
@@ -106,4 +108,10 @@ if ($method === 'POST' || $method === 'PUT') {
         ]);
     }
     json(['id' => $id, 'ok' => true]);
+}
+
+} catch (PDOException $e) {
+    err('DB error: ' . $e->getMessage(), 500);
+} catch (Throwable $e) {
+    err('Error: ' . $e->getMessage(), 500);
 }
