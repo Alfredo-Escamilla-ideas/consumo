@@ -71,6 +71,7 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: typeof Phone; 
 function InsuranceModal({ initial, onSave, onClose }: { initial: Insurance; onSave: (ins: Insurance) => Promise<void>; onClose: () => void }) {
   const [f, setF] = useState<Insurance>({ ...initial })
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [coverageText, setCoverageText] = useState(initial.coverages.join('\n'))
 
   function set(k: keyof Insurance, v: unknown) { setF(p => ({ ...p, [k]: v })) }
@@ -79,12 +80,17 @@ function InsuranceModal({ initial, onSave, onClose }: { initial: Insurance; onSa
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    setSaveError(null)
     try {
       const id = f.id || crypto.randomUUID()
       const coverages = coverageText.split('\n').map(s => s.trim()).filter(Boolean)
       await onSave({ ...f, id, coverages })
       onClose()
-    } finally { setSaving(false) }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Error al guardar')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -204,6 +210,9 @@ function InsuranceModal({ initial, onSave, onClose }: { initial: Insurance; onSa
             <textarea rows={2} className={`${inp} resize-none`} placeholder="Condiciones especiales, descuentos, etc." value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} />
           </div>
 
+          {saveError && (
+            <p className="text-xs text-jaecoo-danger bg-jaecoo-danger/10 border border-jaecoo-danger/20 rounded-xl px-3 py-2">{saveError}</p>
+          )}
           <button type="submit" disabled={saving}
             className="w-full py-3 bg-jaecoo-electric text-jaecoo-base font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
             {saving && <Loader2 size={16} className="animate-spin" />}
