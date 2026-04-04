@@ -8,26 +8,30 @@ $vid = $vehicle['id'];
 $method = $_SERVER['REQUEST_METHOD'];
 $db = getDB();
 
-// Create table if not exists
-$db->exec("CREATE TABLE IF NOT EXISTS tires (
-  id VARCHAR(32) PRIMARY KEY,
-  vehicle_id INT NOT NULL,
-  brand VARCHAR(100) NOT NULL,
-  model_name VARCHAR(100) NOT NULL,
-  type VARCHAR(20) NOT NULL,
-  size VARCHAR(30) NOT NULL,
-  position VARCHAR(20) NOT NULL,
-  purchase_date DATE NOT NULL,
-  purchase_price DECIMAL(8,2) NULL,
-  odometer_at_install INT UNSIGNED NOT NULL DEFAULT 0,
-  estimated_life_km INT UNSIGNED NOT NULL DEFAULT 40000,
-  tread_depth_mm DECIMAL(4,1) NULL,
-  estimated_change_date DATE NULL,
-  dot_code VARCHAR(10) NULL,
-  notes TEXT NULL,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_vehicle (vehicle_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+try {
+    $db->exec("CREATE TABLE IF NOT EXISTS tires (
+      id VARCHAR(36) PRIMARY KEY,
+      vehicle_id INT NOT NULL,
+      brand VARCHAR(100) NOT NULL,
+      model_name VARCHAR(100) NOT NULL,
+      type VARCHAR(20) NOT NULL,
+      size VARCHAR(30) NOT NULL,
+      position VARCHAR(20) NOT NULL,
+      purchase_date DATE NOT NULL,
+      purchase_price DECIMAL(8,2) NULL,
+      odometer_at_install INT UNSIGNED NOT NULL DEFAULT 0,
+      estimated_life_km INT UNSIGNED NOT NULL DEFAULT 40000,
+      tread_depth_mm DECIMAL(4,1) NULL,
+      estimated_change_date DATE NULL,
+      dot_code VARCHAR(10) NULL,
+      notes TEXT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_vehicle (vehicle_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->exec("ALTER TABLE tires MODIFY COLUMN id VARCHAR(36) NOT NULL");
+} catch (PDOException $e) {
+    err('Error al inicializar tabla: ' . $e->getMessage(), 500);
+}
 
 function mapTire(array $r): array {
     return [
@@ -47,6 +51,8 @@ function mapTire(array $r): array {
         'notes'              => $r['notes'],
     ];
 }
+
+try {
 
 if ($method === 'GET') {
     $st = $db->prepare('SELECT * FROM tires WHERE vehicle_id = ? ORDER BY position ASC');
@@ -82,7 +88,7 @@ if ($method === 'PUT') {
     $id = $_GET['id'] ?? '';
     $st = $db->prepare('SELECT id FROM tires WHERE id = ? AND vehicle_id = ?');
     $st->execute([$id, $vid]);
-    if (!$st->fetch()) { jsonError('Not found', 404); }
+    if (!$st->fetch()) { err('Not found', 404); }
     $db->prepare(
         'UPDATE tires SET brand=?, model_name=?, type=?, size=?, position=?,
          purchase_date=?, purchase_price=?, odometer_at_install=?, estimated_life_km=?,
@@ -107,4 +113,10 @@ if ($method === 'DELETE') {
     $id = $_GET['id'] ?? '';
     $db->prepare('DELETE FROM tires WHERE id = ? AND vehicle_id = ?')->execute([$id, $vid]);
     json(['ok' => true]);
+}
+
+} catch (PDOException $e) {
+    err('DB error: ' . $e->getMessage(), 500);
+} catch (Throwable $e) {
+    err('Error: ' . $e->getMessage(), 500);
 }
