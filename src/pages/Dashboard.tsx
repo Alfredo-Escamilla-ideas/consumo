@@ -222,15 +222,13 @@ export default function Dashboard() {
       {insurance !== undefined && (() => {
         if (!insurance) {
           return (
-            <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 flex items-center gap-3 transition-all group">
-              <div className="w-9 h-9 rounded-xl bg-jaecoo-elevated flex items-center justify-center shrink-0">
-                <Shield size={18} className="text-jaecoo-muted" />
+            <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 transition-all group">
+              <div className="flex items-center gap-2 mb-1">
+                <Shield size={15} className="text-jaecoo-muted" />
+                <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-secondary">Seguro del vehículo</p>
+                <ChevronRight size={13} className="text-jaecoo-muted ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-jaecoo-primary">Seguro del vehículo</p>
-                <p className="text-xs text-jaecoo-muted">No hay seguro registrado — toca para añadirlo</p>
-              </div>
-              <ChevronRight size={14} className="text-jaecoo-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              <p className="text-sm text-jaecoo-muted">No hay seguro registrado — toca para añadirlo</p>
             </Link>
           )
         }
@@ -239,20 +237,17 @@ export default function Dashboard() {
         const expiry = insExpiryBadge(insurance.endDate)
         return (
           <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 transition-all group">
-            <div className="flex items-center gap-3 mb-3">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${typeInfo.color}`}>
-                <TypeIcon size={18} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-bold text-jaecoo-primary">{insurance.company}</p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
-                  {expiry && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${expiry.color}`}>{expiry.label}</span>}
-                </div>
-                {insurance.policyNumber && <p className="text-xs text-jaecoo-muted mt-0.5">Póliza {insurance.policyNumber}</p>}
-              </div>
-              <ChevronRight size={14} className="text-jaecoo-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            <div className="flex items-center gap-2 mb-2">
+              <TypeIcon size={15} className={typeInfo.color.split(' ')[0]} />
+              <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-secondary">Seguro del vehículo</p>
+              <ChevronRight size={13} className="text-jaecoo-muted ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <p className="text-lg font-bold text-jaecoo-primary">{insurance.company}</p>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
+              {expiry && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${expiry.color}`}>{expiry.label}</span>}
+            </div>
+            {insurance.policyNumber && <p className="text-xs text-jaecoo-muted mb-2">Póliza {insurance.policyNumber}</p>}
             <div className="flex flex-wrap gap-4">
               {insurance.endDate && (
                 <div className="flex items-center gap-1.5">
