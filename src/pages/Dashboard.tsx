@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays } from 'lucide-react'
+import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays, Wrench, ClipboardList } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import StatCard from '../components/StatCard'
 import {
@@ -18,8 +18,8 @@ import {
   FUEL_MAX_RANGE_KM,
 } from '../utils/calculations'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import type { Insurance } from '../types'
-import { apiGetInsurance } from '../services/api'
+import type { Insurance, Repair, MaintenanceService } from '../types'
+import { apiGetInsurance, apiGetRepairs, apiGetMaintenance } from '../services/api'
 
 const INSURANCE_TYPES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
   third_party:          { label: 'Terceros',                    color: 'text-jaecoo-muted bg-jaecoo-elevated',          icon: Shield      },
@@ -47,9 +47,13 @@ export default function Dashboard() {
   const { data, isLoading } = useData()
   const { electricCharges, fuelRefuels } = data
   const [insurance, setInsurance] = useState<Insurance | null | undefined>(undefined)
+  const [repairs, setRepairs] = useState<Repair[] | undefined>(undefined)
+  const [maintenance, setMaintenance] = useState<MaintenanceService[] | undefined>(undefined)
 
   useEffect(() => {
     apiGetInsurance().then(setInsurance).catch(() => setInsurance(null))
+    apiGetRepairs().then(setRepairs).catch(() => setRepairs([]))
+    apiGetMaintenance().then(setMaintenance).catch(() => setMaintenance([]))
   }, [])
 
   if (isLoading) {
@@ -218,59 +222,122 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Seguro ── */}
-      {insurance !== undefined && (() => {
-        if (!insurance) {
-          return (
+      {/* ── Seguro / Averías / Mantenimientos ── */}
+      <div className="grid sm:grid-cols-3 gap-4">
+
+        {/* Seguro */}
+        {(() => {
+          if (!insurance) return (
             <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
               <div className="flex items-center gap-2 mb-1">
                 <Shield size={15} className="text-emerald-400" />
-                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
+                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro</p>
                 <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <p className="text-sm text-jaecoo-muted">No hay seguro registrado — toca para añadirlo</p>
+              <p className="text-sm text-jaecoo-muted">Sin seguro registrado</p>
             </Link>
           )
-        }
-        const typeInfo = INSURANCE_TYPES[insurance.type] ?? INSURANCE_TYPES.comprehensive
-        const TypeIcon = typeInfo.icon
-        const expiry = insExpiryBadge(insurance.endDate)
-        return (
-          <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
-            <div className="flex items-center gap-2 mb-2">
-              <TypeIcon size={15} className="text-emerald-400" />
-              <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
-              <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <p className="text-lg font-bold text-jaecoo-primary">{insurance.company}</p>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
-              {expiry && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${expiry.color}`}>{expiry.label}</span>}
-            </div>
-            {insurance.policyNumber && <p className="text-xs text-jaecoo-muted mb-2">Póliza {insurance.policyNumber}</p>}
-            <div className="flex flex-wrap gap-4">
-              {insurance.endDate && (
-                <div className="flex items-center gap-1.5">
-                  <CalendarDays size={12} className="text-jaecoo-muted" />
-                  <span className="text-[11px] text-jaecoo-secondary">Vence {insurance.endDate}</span>
-                </div>
+          const typeInfo = INSURANCE_TYPES[insurance.type] ?? INSURANCE_TYPES.comprehensive
+          const TypeIcon = typeInfo.icon
+          const expiry = insExpiryBadge(insurance.endDate)
+          return (
+            <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
+              <div className="flex items-center gap-2 mb-2">
+                <TypeIcon size={15} className="text-emerald-400" />
+                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro</p>
+                <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <p className="text-base font-bold text-jaecoo-primary truncate">{insurance.company}</p>
+              <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
+                {expiry && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${expiry.color}`}>{expiry.label}</span>}
+              </div>
+              <div className="flex flex-col gap-1">
+                {insurance.endDate && <div className="flex items-center gap-1.5"><CalendarDays size={11} className="text-jaecoo-muted" /><span className="text-[11px] text-jaecoo-secondary">Vence {insurance.endDate}</span></div>}
+                {insurance.emergencyPhone && <div className="flex items-center gap-1.5"><Phone size={11} className="text-jaecoo-muted" /><span className="text-[11px] text-jaecoo-secondary">{insurance.emergencyPhone}</span></div>}
+                {insurance.annualPrice != null && <div className="flex items-center gap-1.5"><Euro size={11} className="text-jaecoo-muted" /><span className="text-[11px] text-jaecoo-secondary">{formatCurrency(insurance.annualPrice)}/año</span></div>}
+              </div>
+            </Link>
+          )
+        })()}
+
+        {/* Averías */}
+        {(() => {
+          const openRepairs = (repairs ?? []).filter(r => r.status === 'open' || r.status === 'in_repair')
+          const last = [...(repairs ?? [])].sort((a, b) => b.date.localeCompare(a.date))[0]
+          const STATUS: Record<string, { label: string; color: string }> = {
+            open:      { label: 'Abierta',      color: 'text-rose-400 bg-rose-500/10' },
+            in_repair: { label: 'En taller',    color: 'text-jaecoo-fuel bg-jaecoo-fuel-dim' },
+            resolved:  { label: 'Resuelta',     color: 'text-emerald-400 bg-emerald-500/10' },
+            warranty:  { label: 'En garantía',  color: 'text-jaecoo-electric bg-jaecoo-electric-dim' },
+          }
+          const hasOpen = openRepairs.length > 0
+          return (
+            <Link to="/garage" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <Wrench size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Averías</p>
+                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-rose-400 bg-rose-500/10 ml-1">{openRepairs.length} abierta{openRepairs.length > 1 ? 's' : ''}</span>}
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'}`} />
+              </div>
+              {!last ? (
+                <p className="text-sm text-jaecoo-muted">Sin averías registradas</p>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-jaecoo-primary truncate">{last.description}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS[last.status]?.color ?? ''}`}>{STATUS[last.status]?.label}</span>
+                    <span className="text-[11px] text-jaecoo-muted">{last.date}</span>
+                  </div>
+                  {(repairs ?? []).length > 1 && <p className="text-[11px] text-jaecoo-muted mt-1">{(repairs ?? []).length} averías en total</p>}
+                </>
               )}
-              {insurance.emergencyPhone && (
-                <div className="flex items-center gap-1.5">
-                  <Phone size={12} className="text-jaecoo-muted" />
-                  <span className="text-[11px] text-jaecoo-secondary">{insurance.emergencyPhone}</span>
-                </div>
+            </Link>
+          )
+        })()}
+
+        {/* Mantenimientos */}
+        {(() => {
+          const sorted = [...(maintenance ?? [])].sort((a, b) => b.date.localeCompare(a.date))
+          const last = sorted[0]
+          const nextService = sorted.find(s => s.nextDate)
+          const MAINT_TYPES: Record<string, string> = {
+            annual: 'Revisión anual', oil: 'Cambio aceite', brakes: 'Frenos',
+            tires: 'Neumáticos', battery: 'Batería', full: 'Revisión completa', other: 'Otro',
+          }
+          const daysToNext = nextService?.nextDate
+            ? Math.round((new Date(nextService.nextDate).getTime() - Date.now()) / 86400000)
+            : null
+          const alert = daysToNext !== null && daysToNext <= 30
+          return (
+            <Link to="/garage" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-yellow-400/10 border-yellow-400/20 hover:border-yellow-400/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <ClipboardList size={15} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>Mantenimiento</p>
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${alert ? 'text-yellow-400' : 'text-jaecoo-muted'}`} />
+              </div>
+              {!last ? (
+                <p className="text-sm text-jaecoo-muted">Sin mantenimientos registrados</p>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-jaecoo-primary">{MAINT_TYPES[last.type] ?? last.type}</p>
+                  <p className="text-[11px] text-jaecoo-muted mt-0.5">Último: {last.date}</p>
+                  {nextService?.nextDate && (
+                    <div className="flex items-center gap-1.5 mt-1.5">
+                      <CalendarDays size={11} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
+                      <span className={`text-[11px] font-semibold ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>
+                        Próximo: {nextService.nextDate}{daysToNext !== null ? ` (${daysToNext < 0 ? 'hace ' + Math.abs(daysToNext) + ' días' : 'en ' + daysToNext + ' días'})` : ''}
+                      </span>
+                    </div>
+                  )}
+                  {(maintenance ?? []).length > 1 && <p className="text-[11px] text-jaecoo-muted mt-1">{(maintenance ?? []).length} servicios registrados</p>}
+                </>
               )}
-              {insurance.annualPrice != null && (
-                <div className="flex items-center gap-1.5">
-                  <Euro size={12} className="text-jaecoo-muted" />
-                  <span className="text-[11px] text-jaecoo-secondary">{formatCurrency(insurance.annualPrice)}/año</span>
-                </div>
-              )}
-            </div>
-          </Link>
-        )
-      })()}
+            </Link>
+          )
+        })()}
+
+      </div>
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
