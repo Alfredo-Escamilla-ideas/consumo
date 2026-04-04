@@ -20,8 +20,25 @@ const TYPES: { value: TireType; label: string; color: string }[] = [
   { value: 'allseason',label: 'All-Season', color: 'text-emerald-400 bg-emerald-500/10' },
 ]
 
+const TIRE_BRANDS = [
+  'Giti', 'Michelin', 'Bridgestone', 'Continental', 'Goodyear', 'Pirelli',
+  'Dunlop', 'Hankook', 'Yokohama', 'Falken', 'Kumho', 'Toyo', 'Nexen',
+  'Cooper', 'BFGoodrich', 'Uniroyal', 'Semperit', 'Firestone', 'General',
+  'Vredestein', 'Maxxis', 'Nankang', 'Sailun', 'Laufenn', 'Kleber',
+]
+
+// Tamaños compatibles con Jaecoo 7 PHEV (OEM primero)
+const JAECOO7_SIZES = [
+  '235/50 R19 103V',  // OEM — Giti GitiComfort F50
+  '235/50 R19',
+  '235/55 R18',
+  '235/55 R18 104V',
+  '245/45 R19',
+  '245/45 R19 102W',
+]
+
 const EMPTY_FORM: Omit<Tire, 'id'> = {
-  brand: '', model: '', type: 'summer', size: '', position: 'front_left',
+  brand: 'Giti', model: 'GitiComfort F50', type: 'summer', size: '235/50 R19 103V', position: 'front_left',
   purchaseDate: new Date().toISOString().slice(0, 10),
   purchasePrice: undefined, odometerAtInstall: 0, estimatedLifeKm: 40000,
   treadDepthMm: undefined, estimatedChangeDate: undefined, dotCode: undefined, notes: undefined,
@@ -193,10 +210,17 @@ function TireModal({
         </div>
 
         <form onSubmit={submit} className="p-5 space-y-4">
+          <datalist id="tire-brands">
+            {TIRE_BRANDS.map(b => <option key={b} value={b} />)}
+          </datalist>
+          <datalist id="tire-sizes">
+            {JAECOO7_SIZES.map(s => <option key={s} value={s} />)}
+          </datalist>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={lbl}>Marca *</label>
-              <input required className={inp} placeholder="Michelin" value={f.brand} onChange={e => set('brand', e.target.value)} />
+              <input required list="tire-brands" className={inp} placeholder="Michelin" value={f.brand} onChange={e => set('brand', e.target.value)} />
             </div>
             <div>
               <label className={lbl}>Modelo *</label>
@@ -207,7 +231,7 @@ function TireModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={lbl}>Tamaño *</label>
-              <input required className={inp} placeholder="235/55R18" value={f.size} onChange={e => set('size', e.target.value)} />
+              <input required list="tire-sizes" className={inp} placeholder="235/50 R19" value={f.size} onChange={e => set('size', e.target.value)} />
             </div>
             <div>
               <label className={lbl}>Posición *</label>

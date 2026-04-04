@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank } from 'lucide-react'
+import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import StatCard from '../components/StatCard'
 import {
@@ -17,6 +18,24 @@ import {
   FUEL_MAX_RANGE_KM,
 } from '../utils/calculations'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import type { Insurance } from '../types'
+import { apiGetInsurance } from '../services/api'
+
+const INSURANCE_TYPES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
+  third_party:          { label: 'Terceros',                    color: 'text-jaecoo-muted bg-jaecoo-elevated',          icon: Shield      },
+  third_party_plus:     { label: 'Terceros ampliado',           color: 'text-jaecoo-electric bg-jaecoo-electric-dim',   icon: ShieldCheck },
+  comprehensive_excess: { label: 'Todo riesgo c/ franquicia',   color: 'text-yellow-400 bg-yellow-400/10',              icon: ShieldAlert },
+  comprehensive:        { label: 'Todo riesgo',                 color: 'text-emerald-400 bg-emerald-500/10',            icon: ShieldCheck },
+}
+
+function insExpiryBadge(dateStr?: string) {
+  if (!dateStr) return null
+  const days = Math.round((new Date(dateStr).getTime() - Date.now()) / 86400000)
+  if (days < 0)   return { label: `Vencido hace ${Math.abs(days)} días`, color: 'text-rose-400 bg-rose-500/10' }
+  if (days <= 30) return { label: `Vence en ${days} días`,              color: 'text-jaecoo-fuel bg-jaecoo-fuel-dim' }
+  if (days <= 90) return { label: `Vence en ${days} días`,              color: 'text-yellow-400 bg-yellow-400/10' }
+  return            { label: `Vigente — ${days} días`,                  color: 'text-emerald-400 bg-emerald-500/10' }
+}
 
 const TOOLTIP_STYLE = {
   contentStyle: { background: '#141c2e', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '12px', color: '#e2e8f0', fontSize: 12 },
@@ -27,6 +46,11 @@ const TOOLTIP_STYLE = {
 export default function Dashboard() {
   const { data, isLoading } = useData()
   const { electricCharges, fuelRefuels } = data
+  const [insurance, setInsurance] = useState<Insurance | null | undefined>(undefined)
+
+  useEffect(() => {
+    apiGetInsurance().then(setInsurance).catch(() => setInsurance(null))
+  }, [])
 
   if (isLoading) {
     return (
@@ -193,6 +217,65 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ── Seguro ── */}
+      {insurance !== undefined && (() => {
+        if (!insurance) {
+          return (
+            <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 flex items-center gap-3 transition-all group">
+              <div className="w-9 h-9 rounded-xl bg-jaecoo-elevated flex items-center justify-center shrink-0">
+                <Shield size={18} className="text-jaecoo-muted" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-jaecoo-primary">Seguro del vehículo</p>
+                <p className="text-xs text-jaecoo-muted">No hay seguro registrado — toca para añadirlo</p>
+              </div>
+              <ChevronRight size={14} className="text-jaecoo-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            </Link>
+          )
+        }
+        const typeInfo = INSURANCE_TYPES[insurance.type] ?? INSURANCE_TYPES.comprehensive
+        const TypeIcon = typeInfo.icon
+        const expiry = insExpiryBadge(insurance.endDate)
+        return (
+          <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 transition-all group">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${typeInfo.color}`}>
+                <TypeIcon size={18} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-bold text-jaecoo-primary">{insurance.company}</p>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${typeInfo.color}`}>{typeInfo.label}</span>
+                  {expiry && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${expiry.color}`}>{expiry.label}</span>}
+                </div>
+                {insurance.policyNumber && <p className="text-xs text-jaecoo-muted mt-0.5">Póliza {insurance.policyNumber}</p>}
+              </div>
+              <ChevronRight size={14} className="text-jaecoo-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+            </div>
+            <div className="flex flex-wrap gap-4">
+              {insurance.endDate && (
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays size={12} className="text-jaecoo-muted" />
+                  <span className="text-[11px] text-jaecoo-secondary">Vence {insurance.endDate}</span>
+                </div>
+              )}
+              {insurance.emergencyPhone && (
+                <div className="flex items-center gap-1.5">
+                  <Phone size={12} className="text-jaecoo-muted" />
+                  <span className="text-[11px] text-jaecoo-secondary">{insurance.emergencyPhone}</span>
+                </div>
+              )}
+              {insurance.annualPrice != null && (
+                <div className="flex items-center gap-1.5">
+                  <Euro size={12} className="text-jaecoo-muted" />
+                  <span className="text-[11px] text-jaecoo-secondary">{formatCurrency(insurance.annualPrice)}/año</span>
+                </div>
+              )}
+            </div>
+          </Link>
+        )
+      })()}
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
