@@ -222,11 +222,11 @@ export default function Dashboard() {
       {insurance !== undefined && (() => {
         if (!insurance) {
           return (
-            <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 transition-all group">
+            <Link to="/seguro" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
               <div className="flex items-center gap-2 mb-1">
-                <Shield size={15} className="text-jaecoo-muted" />
-                <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-secondary">Seguro del vehículo</p>
-                <ChevronRight size={13} className="text-jaecoo-muted ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Shield size={15} className="text-emerald-400" />
+                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
+                <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <p className="text-sm text-jaecoo-muted">No hay seguro registrado — toca para añadirlo</p>
             </Link>
@@ -236,11 +236,11 @@ export default function Dashboard() {
         const TypeIcon = typeInfo.icon
         const expiry = insExpiryBadge(insurance.endDate)
         return (
-          <Link to="/seguro" className="bg-jaecoo-card border border-jaecoo-border hover:border-jaecoo-border-strong rounded-2xl p-4 transition-all group">
+          <Link to="/seguro" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
-              <TypeIcon size={15} className={typeInfo.color.split(' ')[0]} />
-              <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-secondary">Seguro del vehículo</p>
-              <ChevronRight size={13} className="text-jaecoo-muted ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <TypeIcon size={15} className="text-emerald-400" />
+              <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro del vehículo</p>
+              <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <p className="text-lg font-bold text-jaecoo-primary">{insurance.company}</p>
