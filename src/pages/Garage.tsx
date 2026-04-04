@@ -120,6 +120,7 @@ const EMPTY_REPAIR: Repair = {
 function RepairModal({ initial, onSave, onClose }: { initial: Repair; onSave: (r: Repair) => Promise<void>; onClose: () => void }) {
   const [f, setF] = useState<Repair>({ ...initial })
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [partSearch, setPartSearch] = useState('')
 
   function set(k: keyof Repair, v: unknown) { setF(p => ({ ...p, [k]: v })) }
@@ -139,7 +140,9 @@ function RepairModal({ initial, onSave, onClose }: { initial: Repair; onSave: (r
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    setSaveError(null)
     try { await onSave({ ...f, id: f.id || crypto.randomUUID() }); onClose() }
+    catch (err) { setSaveError(err instanceof Error ? err.message : 'Error al guardar') }
     finally { setSaving(false) }
   }
 
@@ -266,6 +269,7 @@ function RepairModal({ initial, onSave, onClose }: { initial: Repair; onSave: (r
             <textarea rows={2} className={`${inp} resize-none`} value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} />
           </div>
 
+          {saveError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2">{saveError}</p>}
           <button type="submit" disabled={saving}
             className="w-full py-3 bg-jaecoo-electric text-jaecoo-base font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
             {saving && <Loader2 size={16} className="animate-spin" />}
@@ -290,6 +294,7 @@ function MaintenanceModal({ initial, currentOdo, onSave, onClose }: {
 }) {
   const [f, setF] = useState<MaintenanceService>({ ...initial })
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   function set(k: keyof MaintenanceService, v: unknown) { setF(p => ({ ...p, [k]: v })) }
   function toggleItem(item: string) {
@@ -312,7 +317,9 @@ function MaintenanceModal({ initial, currentOdo, onSave, onClose }: {
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
+    setSaveError(null)
     try { await onSave({ ...f, id: f.id || crypto.randomUUID() }); onClose() }
+    catch (err) { setSaveError(err instanceof Error ? err.message : 'Error al guardar') }
     finally { setSaving(false) }
   }
 
@@ -402,6 +409,7 @@ function MaintenanceModal({ initial, currentOdo, onSave, onClose }: {
           <div><label className={lbl}>Observaciones</label>
             <textarea rows={2} className={`${inp} resize-none`} value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} /></div>
 
+          {saveError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2">{saveError}</p>}
           <button type="submit" disabled={saving}
             className="w-full py-3 bg-jaecoo-electric text-jaecoo-base font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
             {saving && <Loader2 size={16} className="animate-spin" />}

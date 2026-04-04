@@ -8,8 +8,9 @@ $vid = $vehicle['id'];
 $method = $_SERVER['REQUEST_METHOD'];
 $db = getDB();
 
+try {
 $db->exec("CREATE TABLE IF NOT EXISTS repairs (
-  id VARCHAR(32) PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   vehicle_id INT NOT NULL,
   date DATE NOT NULL,
   odometer INT UNSIGNED NULL,
@@ -29,6 +30,8 @@ $db->exec("CREATE TABLE IF NOT EXISTS repairs (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_vehicle (vehicle_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $db->exec("ALTER TABLE repairs MODIFY COLUMN id VARCHAR(36) NOT NULL");
+} catch (PDOException $e) { err('Error al inicializar tabla: ' . $e->getMessage(), 500); }
 
 function mapRepair(array $r): array {
     return [
