@@ -18,7 +18,8 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
       ...(options.headers ?? {}),
     },
   })
-  const data = await res.json()
+  const text = await res.text()
+  const data = text.trim() ? JSON.parse(text) : {}
   if (!res.ok) {
     // Sesión expirada → forzar logout (solo en rutas autenticadas)
     if (res.status === 401 && !AUTH_ENDPOINTS.includes(path)) {

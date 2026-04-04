@@ -8,26 +8,30 @@ $vid = $vehicle['id'];
 $method = $_SERVER['REQUEST_METHOD'];
 $db = getDB();
 
-$db->exec("CREATE TABLE IF NOT EXISTS insurance (
-  id VARCHAR(32) PRIMARY KEY,
-  vehicle_id INT NOT NULL UNIQUE,
-  company VARCHAR(100) NOT NULL,
-  policy_number VARCHAR(100) NOT NULL DEFAULT '',
-  type VARCHAR(30) NOT NULL DEFAULT 'comprehensive',
-  annual_price DECIMAL(10,2) NULL,
-  excess_amount DECIMAL(10,2) NULL,
-  start_date DATE NULL,
-  end_date DATE NULL,
-  auto_renewal TINYINT(1) NOT NULL DEFAULT 1,
-  agent_name VARCHAR(100) NULL,
-  agent_phone VARCHAR(30) NULL,
-  agent_email VARCHAR(100) NULL,
-  emergency_phone VARCHAR(30) NULL,
-  coverages TEXT NULL,
-  notes TEXT NULL,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_vehicle (vehicle_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+try {
+    $db->exec("CREATE TABLE IF NOT EXISTS insurance (
+      id VARCHAR(32) PRIMARY KEY,
+      vehicle_id INT NOT NULL UNIQUE,
+      company VARCHAR(100) NOT NULL,
+      policy_number VARCHAR(100) NOT NULL DEFAULT '',
+      type VARCHAR(30) NOT NULL DEFAULT 'comprehensive',
+      annual_price DECIMAL(10,2) NULL,
+      excess_amount DECIMAL(10,2) NULL,
+      start_date DATE NULL,
+      end_date DATE NULL,
+      auto_renewal TINYINT(1) NOT NULL DEFAULT 1,
+      agent_name VARCHAR(100) NULL,
+      agent_phone VARCHAR(30) NULL,
+      agent_email VARCHAR(100) NULL,
+      emergency_phone VARCHAR(30) NULL,
+      coverages TEXT NULL,
+      notes TEXT NULL,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_vehicle (vehicle_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+} catch (PDOException $e) {
+    err('Error al inicializar tabla: ' . $e->getMessage(), 500);
+}
 
 function mapInsurance(array $r): array {
     return [
