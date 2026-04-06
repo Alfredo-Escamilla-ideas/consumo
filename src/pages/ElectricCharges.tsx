@@ -293,12 +293,12 @@ export default function ElectricCharges() {
           href="https://buymeacoffee.com/alfredoescd"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium
-            bg-amber-100 text-amber-700 border border-amber-300
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold
+            bg-amber-400 text-amber-900 border border-amber-500
             dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20
-            hover:bg-amber-200 hover:border-amber-400 hover:text-amber-800
+            hover:bg-amber-500 hover:text-white hover:border-amber-600
             dark:hover:bg-amber-500/20 dark:hover:border-amber-500/40 dark:hover:text-amber-300
-            transition-all duration-200 group"
+            transition-all duration-200 group shadow-sm"
         >
           <span className="text-base leading-none">☕</span>
           <span>¿Te es útil esta app? Invítame a un café</span>
