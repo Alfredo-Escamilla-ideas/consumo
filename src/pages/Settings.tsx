@@ -77,6 +77,19 @@ export default function Settings() {
           <Row label="Combustible inicial" value={`${initialFuelLiters} L`} />
           {createdAt && <Row label="Fecha de registro" value={formatDate(createdAt)} />}
         </dl>
+        <div className="mt-4 pt-4 border-t border-jaecoo-border flex justify-center">
+          <a
+            href="https://buymeacoffee.com/alfredoescd"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium
+              text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30
+              hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+          >
+            <span className="text-sm">☕</span>
+            ¿Te es útil esta app? Invítame a un café
+          </a>
+        </div>
       </div>
 
       {/* Stats summary */}

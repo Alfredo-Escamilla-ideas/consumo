@@ -50,20 +50,6 @@ export default function Layout() {
         </main>
       </div>
 
-      {/* Buy Me a Coffee — botón flotante */}
-      <a
-        href="https://buymeacoffee.com/alfredoescd"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Invítame a un café"
-        className="group fixed bottom-5 right-5 z-50 flex items-center gap-2 pl-3 pr-3 py-2 rounded-full
-          bg-amber-600 text-white text-xs font-semibold shadow-lg
-          hover:bg-amber-700 transition-all duration-300 overflow-hidden whitespace-nowrap
-          w-[2.25rem] hover:w-[11rem]"
-      >
-        <span className="text-base leading-none shrink-0">☕</span>
-        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">Invítame a un café</span>
-      </a>
     </div>
   )
 }
