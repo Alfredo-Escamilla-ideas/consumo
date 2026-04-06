@@ -289,22 +289,6 @@ export default function FuelRefuels() {
         />
       )}
 
-      <div className="flex justify-center pt-6 pb-2">
-        <a
-          href="https://buymeacoffee.com/alfredoescd"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold
-            bg-amber-600 text-white border border-amber-700
-            hover:bg-amber-700 hover:border-amber-800
-            transition-all duration-200 group shadow-sm"
-        >
-          <span className="text-base leading-none">☕</span>
-          <span>¿Te es útil esta app? Invítame a un café</span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-amber-400">→</span>
-        </a>
-      </div>
-
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   )
