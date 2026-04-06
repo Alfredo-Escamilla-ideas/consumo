@@ -227,9 +227,6 @@ function TireModal({
         </div>
 
         <form onSubmit={submit} className="p-5 space-y-4">
-          <datalist id="tire-brands">
-            {TIRE_BRANDS.map(b => <option key={b} value={b} />)}
-          </datalist>
           <datalist id="tire-sizes">
             {JAECOO7_SIZES.map(s => <option key={s} value={s} />)}
           </datalist>
@@ -237,7 +234,9 @@ function TireModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={lbl}>Marca *</label>
-              <input required list="tire-brands" className={inp} placeholder="Michelin" value={f.brand} onChange={e => set('brand', e.target.value)} />
+              <select required className={inp} value={f.brand} onChange={e => set('brand', e.target.value)}>
+                {TIRE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
             </div>
             <div>
               <label className={lbl}>Modelo *</label>
