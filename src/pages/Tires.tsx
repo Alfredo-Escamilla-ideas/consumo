@@ -25,6 +25,19 @@ const TIRE_BRANDS = [
   'Dunlop', 'Hankook', 'Yokohama', 'Falken', 'Kumho', 'Toyo', 'Nexen',
   'Cooper', 'BFGoodrich', 'Uniroyal', 'Semperit', 'Firestone', 'General',
   'Vredestein', 'Maxxis', 'Nankang', 'Sailun', 'Laufenn', 'Kleber',
+  'Nokian', 'Barum', 'Sava', 'Matador', 'Fulda', 'Ceat', 'Apollo',
+  'MRF', 'Petlas', 'Triangle', 'Linglong', 'Zeetex', 'Atturo', 'Westlake',
+  'Accelera', 'Aplus', 'Arivo', 'Austone', 'Boto', 'Centara', 'Chaoyang',
+  'Comforser', 'Dayton', 'Delinte', 'Doublestar', 'Duraturn', 'Eldorado',
+  'Evergreen', 'Fortuna', 'Galaxy', 'Goodride', 'GT Radial', 'Headway',
+  'Hifly', 'Imperial', 'Infinity', 'Interstate', 'Ironman', 'Jinyu',
+  'Kenda', 'Landsail', 'Marshal', 'Mazzini', 'Membat', 'Minerva',
+  'Momo', 'Nitto', 'Orium', 'Ovation', 'Pace', 'Paxaro', 'Powertrac',
+  'Radar', 'Runway', 'Sonar', 'Sportiva', 'Star Performer', 'Starfire',
+  'Starmaxx', 'Sunfull', 'Sunwide', 'Superia', 'Taurus', 'Technic',
+  'Tigar', 'Torque', 'Tracmax', 'Trazano', 'Tristar', 'Unigrip',
+  'Venerdi', 'Vitour', 'Wanli', 'Windforce', 'Windpower', 'Wolking',
+  'Wonda', 'Wanstone', 'Yokohama', 'Zeta', 'Zetum',
 ]
 
 // Tamaños compatibles con Jaecoo 7 PHEV (OEM primero)
