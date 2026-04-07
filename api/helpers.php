@@ -36,8 +36,31 @@ function err(string $msg, int $status = 400): never {
     json(['error' => $msg], $status);
 }
 
-function body(): array {
-    return json_decode(file_get_contents('php://input'), true) ?? [];
+function body(int $maxBytes = 65536): array {
+    $raw = file_get_contents('php://input', false, null, 0, $maxBytes + 1);
+    if (strlen($raw) > $maxBytes) err('Payload demasiado grande', 413);
+    return json_decode($raw, true) ?? [];
+}
+
+function requireFloat(array $b, string $key, float $min = 0): float {
+    if (!isset($b[$key]) || !is_numeric($b[$key])) err("Campo '$key' requerido y debe ser numérico");
+    $v = (float)$b[$key];
+    if ($v < $min) err("Campo '$key' debe ser >= $min");
+    return $v;
+}
+
+function requireInt(array $b, string $key, int $min = 0): int {
+    if (!isset($b[$key]) || !is_numeric($b[$key])) err("Campo '$key' requerido y debe ser numérico");
+    $v = (int)$b[$key];
+    if ($v < $min) err("Campo '$key' debe ser >= $min");
+    return $v;
+}
+
+function requireDate(array $b, string $key): string {
+    $v = trim($b[$key] ?? '');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) || !checkdate((int)substr($v,5,2), (int)substr($v,8,2), (int)substr($v,0,4)))
+        err("Campo '$key' debe ser una fecha válida (YYYY-MM-DD)");
+    return $v;
 }
 
 // Rate limiting: max $max intentos por IP en una ventana de $windowSecs segundos.
@@ -84,14 +107,27 @@ function requireAuth(): array {
     }
     $token = $m[1];
     $db = getDB();
+
+    // Añadir columna last_used_at si aún no existe (migración silenciosa)
+    try {
+        $db->exec('ALTER TABLE sessions ADD COLUMN last_used_at DATETIME NULL');
+    } catch (PDOException $e) { /* ya existe, ignorar */ }
+
     $st = $db->prepare(
         'SELECT v.id, v.plate, v.vehicle_model
          FROM sessions s
          JOIN vehicles v ON v.id = s.vehicle_id
-         WHERE s.token = ? AND s.expires_at > NOW()'
+         WHERE s.token = ?
+           AND s.expires_at > NOW()
+           AND (s.last_used_at IS NULL OR s.last_used_at > DATE_SUB(NOW(), INTERVAL 7 DAY))'
     );
     $st->execute([$token]);
     $v = $st->fetch();
     if (!$v) err('Sesión expirada', 401);
+
+    // Actualizar último uso
+    $db->prepare('UPDATE sessions SET last_used_at = NOW() WHERE token = ?')
+       ->execute([$token]);
+
     return $v;
 }

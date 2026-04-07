@@ -40,8 +40,13 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    $b = body();
-    $id = $b['id'] ?? bin2hex(random_bytes(16));
+    $b   = body();
+    $id  = $b['id'] ?? bin2hex(random_bytes(16));
+    $date      = requireDate($b, 'date');
+    $kwh       = requireFloat($b, 'kWh', 0.01);
+    $pPerKwh   = requireFloat($b, 'pricePerKWh', 0);
+    $total     = requireFloat($b, 'totalPrice', 0);
+    $odometer  = requireInt($b, 'odometer', 0);
     try {
         $db->prepare(
             'INSERT INTO electric_charges
@@ -50,31 +55,36 @@ if ($method === 'POST') {
              VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
         )->execute([
             $id, $vid,
-            $b['date'], $b['kWh'], $b['pricePerKWh'],
-            $b['totalPriceGross'] ?? $b['totalPrice'],
-            $b['totalPrice'],
-            isset($b['wayletBefore'])    ? (float)$b['wayletBefore']    : null,
-            isset($b['wayletAfter'])     ? (float)$b['wayletAfter']     : null,
-            isset($b['batteryPercent'])  ? (int)$b['batteryPercent']    : null,
-            $b['odometer'],
-            $b['stationName'], $b['stationAddress'],
+            $date, $kwh, $pPerKwh,
+            isset($b['totalPriceGross']) ? (float)$b['totalPriceGross'] : $total,
+            $total,
+            isset($b['wayletBefore'])   ? (float)$b['wayletBefore']   : null,
+            isset($b['wayletAfter'])    ? (float)$b['wayletAfter']    : null,
+            isset($b['batteryPercent']) ? (int)$b['batteryPercent']   : null,
+            $odometer,
+            $b['stationName'] ?? null, $b['stationAddress'] ?? null,
             $b['drivingMode'] ?? null,
             $b['notes'] ?? null,
         ]);
     } catch (PDOException $e) {
-        err('DB error (POST): ' . $e->getMessage());
+        err('Error al guardar recarga');
     }
     json(['ok' => true, 'id' => $id], 201);
 }
 
 if ($method === 'PUT') {
-    $b = body();
+    $b  = body();
     $id = $_GET['id'] ?? $b['id'] ?? null;
     if (!$id) err('ID requerido');
-    // Verify ownership
     $st = $db->prepare('SELECT id FROM electric_charges WHERE id = ? AND vehicle_id = ?');
     $st->execute([$id, $vid]);
     if (!$st->fetch()) err('No encontrado', 404);
+
+    $date      = requireDate($b, 'date');
+    $kwh       = requireFloat($b, 'kWh', 0.01);
+    $pPerKwh   = requireFloat($b, 'pricePerKWh', 0);
+    $total     = requireFloat($b, 'totalPrice', 0);
+    $odometer  = requireInt($b, 'odometer', 0);
 
     $db->prepare(
         'UPDATE electric_charges SET
@@ -83,14 +93,14 @@ if ($method === 'PUT') {
          odometer=?, station_name=?, station_address=?, driving_mode=?, notes=?
          WHERE id=? AND vehicle_id=?'
     )->execute([
-        $b['date'], $b['kWh'], $b['pricePerKWh'],
-        $b['totalPriceGross'] ?? $b['totalPrice'],
-        $b['totalPrice'],
+        $date, $kwh, $pPerKwh,
+        isset($b['totalPriceGross']) ? (float)$b['totalPriceGross'] : $total,
+        $total,
         isset($b['wayletBefore'])   ? (float)$b['wayletBefore']   : null,
         isset($b['wayletAfter'])    ? (float)$b['wayletAfter']    : null,
         isset($b['batteryPercent']) ? (int)$b['batteryPercent']   : null,
-        $b['odometer'],
-        $b['stationName'], $b['stationAddress'],
+        $odometer,
+        $b['stationName'] ?? null, $b['stationAddress'] ?? null,
         $b['drivingMode'] ?? null,
         $b['notes'] ?? null,
         $id, $vid,

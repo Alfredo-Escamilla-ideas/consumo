@@ -35,18 +35,24 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    $b = body();
-    $id = $b['id'] ?? bin2hex(random_bytes(16));
+    $b        = body();
+    $id       = $b['id'] ?? bin2hex(random_bytes(16));
+    $date     = requireDate($b, 'date');
+    $liters   = requireFloat($b, 'liters', 0.01);
+    $pPerL    = requireFloat($b, 'pricePerLiter', 0);
+    $total    = requireFloat($b, 'totalPrice', 0);
+    $odometer = requireInt($b, 'odometer', 0);
     $db->prepare(
         'INSERT INTO fuel_refuels
          (id, vehicle_id, date, liters, liters_in_tank, total_price, price_per_liter, odometer, station_name, station_address, driving_mode, notes)
          VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
     )->execute([
         $id, $vid,
-        $b['date'], $b['liters'],
+        $date, $liters,
         isset($b['litersInTank']) ? (float)$b['litersInTank'] : null,
-        $b['totalPrice'], $b['pricePerLiter'],
-        $b['odometer'], $b['stationName'], $b['stationAddress'],
+        $total, $pPerL,
+        $odometer,
+        $b['stationName'] ?? null, $b['stationAddress'] ?? null,
         $b['drivingMode'] ?? null,
         $b['notes'] ?? null,
     ]);
@@ -54,12 +60,18 @@ if ($method === 'POST') {
 }
 
 if ($method === 'PUT') {
-    $b = body();
-    $id = $_GET['id'] ?? $b['id'] ?? null;
+    $b        = body();
+    $id       = $_GET['id'] ?? $b['id'] ?? null;
     if (!$id) err('ID requerido');
     $st = $db->prepare('SELECT id FROM fuel_refuels WHERE id = ? AND vehicle_id = ?');
     $st->execute([$id, $vid]);
     if (!$st->fetch()) err('No encontrado', 404);
+
+    $date     = requireDate($b, 'date');
+    $liters   = requireFloat($b, 'liters', 0.01);
+    $pPerL    = requireFloat($b, 'pricePerLiter', 0);
+    $total    = requireFloat($b, 'totalPrice', 0);
+    $odometer = requireInt($b, 'odometer', 0);
 
     $db->prepare(
         'UPDATE fuel_refuels SET
@@ -67,10 +79,11 @@ if ($method === 'PUT') {
          odometer=?, station_name=?, station_address=?, driving_mode=?, notes=?
          WHERE id=? AND vehicle_id=?'
     )->execute([
-        $b['date'], $b['liters'],
+        $date, $liters,
         isset($b['litersInTank']) ? (float)$b['litersInTank'] : null,
-        $b['totalPrice'], $b['pricePerLiter'],
-        $b['odometer'], $b['stationName'], $b['stationAddress'],
+        $total, $pPerL,
+        $odometer,
+        $b['stationName'] ?? null, $b['stationAddress'] ?? null,
         $b['drivingMode'] ?? null,
         $b['notes'] ?? null,
         $id, $vid,
