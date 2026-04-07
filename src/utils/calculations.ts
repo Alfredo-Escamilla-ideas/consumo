@@ -141,7 +141,18 @@ export function calcCombinedStats(
   const totalElectricCost = elStats.totalCost
   const totalFuelCost = fuStats.totalCost
   const totalCost = totalElectricCost + totalFuelCost
-  const totalKm = elStats.totalKm + fuStats.totalKm
+
+  // km total real: diferencia entre el odómetro más alto y el más bajo
+  // de todos los registros combinados. Sumar elStats.totalKm + fuStats.totalKm
+  // duplica los km en un PHEV porque ambas energías cubren el mismo recorrido.
+  const allOdometers = [
+    ...charges.map(c => c.odometer),
+    ...refuels.map(r => r.odometer),
+  ]
+  const totalKm = allOdometers.length >= 2
+    ? Math.max(...allOdometers) - Math.min(...allOdometers)
+    : elStats.totalKm + fuStats.totalKm
+
   const avgCostPerKm = totalKm > 0 ? totalCost / totalKm : 0
 
   const electricKmPercent = totalKm > 0 ? (elStats.totalKm / totalKm) * 100 : 0
