@@ -82,7 +82,10 @@ export default function Settings() {
               <Row label="Combustible inicial" value={`${initialFuelLiters} L`} />
               {createdAt && <Row label="Fecha de registro" value={formatDate(createdAt)} />}
             </dl>
-            <div className="mt-4 pt-4 border-t border-jaecoo-border flex justify-center">
+            <div className="mt-4 pt-4 border-t border-jaecoo-border flex flex-col items-center gap-3">
+              <p className="text-xs text-jaecoo-muted text-center leading-relaxed">
+                Esta WebApp es gratuita y sin anuncios. Si quieres apoyar a su mantenimiento y su desarrollo, puedes invitarme a un café.
+              </p>
               <a
                 href="https://buymeacoffee.com/alfredoescd"
                 target="_blank"
@@ -95,6 +98,7 @@ export default function Settings() {
                 ¿Te es útil esta app? Invítame a un café
               </a>
             </div>
+
           </div>
 
           {/* Stats summary */}
