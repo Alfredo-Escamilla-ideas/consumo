@@ -5,6 +5,8 @@ setCors();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') err('Método no permitido', 405);
 
+checkRateLimit('login', 10, 900); // máx 10 intentos por IP cada 15 min
+
 $b = body();
 $plate = strtoupper(preg_replace('/\s+/', '', $b['plate'] ?? ''));
 $password = $b['password'] ?? '';
