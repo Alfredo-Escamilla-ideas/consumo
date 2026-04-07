@@ -12,7 +12,7 @@ $password = $b['password'] ?? '';
 if (!$plate || !$password) err('Matrícula y contraseña requeridas');
 
 $db = getDB();
-$st = $db->prepare('SELECT id, password_hash, vehicle_model FROM vehicles WHERE plate = ?');
+$st = $db->prepare('SELECT id, password_hash, vehicle_model, initial_odometer, initial_battery_pct, initial_fuel_liters, created_at FROM vehicles WHERE plate = ?');
 $st->execute([$plate]);
 $v = $st->fetch();
 
@@ -28,4 +28,12 @@ $expires = date('Y-m-d H:i:s', strtotime('+' . TOKEN_EXPIRY_DAYS . ' days'));
 $db->prepare('INSERT INTO sessions (token, vehicle_id, expires_at) VALUES (?, ?, ?)')
    ->execute([$token, $v['id'], $expires]);
 
-json(['token' => $token, 'plate' => $plate, 'vehicle_model' => $v['vehicle_model']]);
+json([
+    'token' => $token,
+    'plate' => $plate,
+    'vehicle_model' => $v['vehicle_model'],
+    'initial_odometer' => (int)($v['initial_odometer'] ?? 0),
+    'initial_battery_pct' => (int)($v['initial_battery_pct'] ?? 100),
+    'initial_fuel_liters' => (float)($v['initial_fuel_liters'] ?? 43.0),
+    'created_at' => $v['created_at'] ? substr($v['created_at'], 0, 10) : date('Y-m-d'),
+]);
