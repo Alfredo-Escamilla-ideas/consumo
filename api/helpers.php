@@ -1,4 +1,9 @@
 <?php
+// Ocultar errores en producción: nunca revelar rutas ni stack traces al cliente
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(E_ALL); // seguir registrando en el log del servidor
+
 function setCors(): void {
     $allowed = ['https://lienzovirtual.com', 'http://localhost:5173'];
     $origin  = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -8,6 +13,12 @@ function setCors(): void {
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
     header('Vary: Origin');
+
+    // Cabeceras de seguridad HTTP
+    header('X-Frame-Options: DENY');
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+
     if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
         http_response_code(204);
         exit;
