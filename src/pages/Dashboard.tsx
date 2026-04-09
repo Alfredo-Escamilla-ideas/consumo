@@ -315,7 +315,7 @@ export default function Dashboard() {
             <Link to="/taller?tab=maintenance" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-yellow-400/10 border-yellow-400/20 hover:border-yellow-400/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <ClipboardList size={15} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
-                <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>Mantenimiento</p>
+                <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>Revisiones</p>
                 <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${alert ? 'text-yellow-400' : 'text-jaecoo-muted'}`} />
               </div>
               {!last ? (
