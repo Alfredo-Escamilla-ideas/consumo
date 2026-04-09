@@ -149,7 +149,7 @@ export default function FuelRefuels() {
             <span className="text-xs text-jaecoo-muted">—</span>
             <input type="date" value={filterTo} onChange={e => setFilterTo(e.target.value)} className="text-xs border border-jaecoo-border bg-jaecoo-card text-jaecoo-secondary rounded-lg px-2 py-1 outline-none focus:border-jaecoo-fuel" />
             {hasActiveFilter && (
-              <button onClick={clearFilters} aria-label="Limpiar filtros" className="text-xs text-jaecoo-danger hover:text-jaecoo-danger/80 font-medium flex items-center gap-0.5 px-1">
+              <button onClick={clearFilters} aria-label="Limpiar filtros" className="text-xs text-jaecoo-danger hover:text-jaecoo-danger/80 font-medium flex items-center gap-0.5 px-1 transition-colors">
                 <XIcon size={12} /> Limpiar
               </button>
             )}

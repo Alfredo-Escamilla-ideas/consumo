@@ -397,7 +397,7 @@ function MaintenanceModal({ initial, currentOdo, onSave, onClose }: {
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className={sect.replace('mb-2 mt-4', 'text-[10px] font-bold text-jaecoo-muted uppercase tracking-widest')}>Puntos revisados</p>
-              <button type="button" onClick={() => setF(p => ({ ...p, itemsChecked: MAINTENANCE_CHECKLIST }))} className="text-[10px] text-jaecoo-electric hover:underline">Marcar todos</button>
+              <button type="button" onClick={() => setF(p => ({ ...p, itemsChecked: MAINTENANCE_CHECKLIST }))} className="text-[10px] text-jaecoo-electric hover:underline transition-colors">Marcar todos</button>
             </div>
             <div className="border border-jaecoo-border rounded-xl p-3 space-y-1.5 max-h-48 overflow-y-auto">
               {MAINTENANCE_CHECKLIST.map(item => (
@@ -979,7 +979,30 @@ export default function Garage() {
     await apiDeleteAccident(id); setAccidents(p => p.filter(x => x.id !== id))
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-jaecoo-electric" size={32} /></div>
+  if (loading) return (
+    <div className="space-y-5 animate-pulse">
+      <div className="flex gap-1 bg-jaecoo-elevated p-1 rounded-2xl">
+        {[0,1,2].map(i => <div key={i} className="flex-1 h-10 bg-jaecoo-card rounded-xl" />)}
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {[0,1,2].map(i => (
+          <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-3">
+            <div className="h-6 bg-jaecoo-elevated rounded-full w-10 mx-auto mb-1" />
+            <div className="h-2.5 bg-jaecoo-elevated rounded-full w-14 mx-auto" />
+          </div>
+        ))}
+      </div>
+      {[0,1,2,3].map(i => (
+        <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-4 flex gap-3">
+          <div className="w-10 h-10 bg-jaecoo-elevated rounded-xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 bg-jaecoo-elevated rounded-full w-1/4" />
+            <div className="h-4 bg-jaecoo-elevated rounded-full w-3/4" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 
   const openCount     = repairs.filter(r => r.status === 'open').length
   const inRepairCount = repairs.filter(r => r.status === 'in_repair').length

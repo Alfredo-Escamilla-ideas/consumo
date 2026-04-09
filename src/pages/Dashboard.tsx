@@ -60,8 +60,46 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="animate-spin text-jaecoo-electric" size={32} />
+      <div className="space-y-5 animate-pulse">
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[0,1].map(i => (
+            <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-20 mb-4" />
+              <div className="h-7 bg-jaecoo-elevated rounded-full w-1/2 mb-2" />
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-2/3" />
+            </div>
+          ))}
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[0,1,2,3].map(i => (
+            <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-4">
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-16 mb-3" />
+              <div className="h-5 bg-jaecoo-elevated rounded-full w-3/4 mb-1.5" />
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-1/2" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {[0,1,2,3,4,5].map(i => (
+            <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-4">
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-12 mb-3" />
+              <div className="h-6 bg-jaecoo-elevated rounded-full w-full" />
+            </div>
+          ))}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[0,1].map(i => (
+            <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-24 mb-4" />
+              {[0,1,2,3].map(j => (
+                <div key={j} className="flex gap-3 py-2.5 border-b border-jaecoo-border last:border-0">
+                  <div className="h-3 bg-jaecoo-elevated rounded-full w-16" />
+                  <div className="h-3 bg-jaecoo-elevated rounded-full flex-1" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -438,7 +476,7 @@ export default function Dashboard() {
           <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-jaecoo-primary">Últimas recargas</h2>
-              <Link to="/recargas" className="text-xs text-jaecoo-electric hover:text-jaecoo-electric/80 flex items-center gap-0.5">Ver todas <ChevronRight size={12} /></Link>
+              <Link to="/recargas" className="text-xs text-jaecoo-electric hover:text-jaecoo-electric/80 flex items-center gap-0.5 transition-colors">Ver todas <ChevronRight size={12} /></Link>
             </div>
             {recentCharges.length === 0 ? (
               <p className="text-xs text-jaecoo-muted py-8 text-center">Sin recargas</p>
@@ -464,7 +502,7 @@ export default function Dashboard() {
           <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-jaecoo-primary">Últimos repostajes</h2>
-              <Link to="/repostajes" className="text-xs text-jaecoo-fuel hover:text-jaecoo-fuel/80 flex items-center gap-0.5">Ver todos <ChevronRight size={12} /></Link>
+              <Link to="/repostajes" className="text-xs text-jaecoo-fuel hover:text-jaecoo-fuel/80 flex items-center gap-0.5 transition-colors">Ver todos <ChevronRight size={12} /></Link>
             </div>
             {recentRefuels.length === 0 ? (
               <p className="text-xs text-jaecoo-muted py-8 text-center">Sin repostajes</p>

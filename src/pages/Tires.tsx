@@ -361,7 +361,30 @@ export default function Tires() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-jaecoo-electric" size={32} /></div>
+    return (
+      <div className="space-y-5 animate-pulse">
+        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-6">
+          <div className="h-3 bg-jaecoo-elevated rounded-full w-24 mb-6" />
+          <div className="grid grid-cols-2 gap-x-16 gap-y-10 max-w-xs mx-auto">
+            {[0,1,2,3].map(i => (
+              <div key={i} className="bg-jaecoo-elevated rounded-xl h-16" />
+            ))}
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[0,1,2,3].map(i => (
+            <div key={i} className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-4 flex gap-3">
+              <div className="w-10 h-10 bg-jaecoo-elevated rounded-xl shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 bg-jaecoo-elevated rounded-full w-1/3" />
+                <div className="h-4 bg-jaecoo-elevated rounded-full w-2/3" />
+                <div className="h-2.5 bg-jaecoo-elevated rounded-full w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   const tireAt = (pos: TirePosition) => tires.find(t => t.position === pos)

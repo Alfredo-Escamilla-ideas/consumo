@@ -240,7 +240,49 @@ export default function InsurancePage() {
     setIns(data)
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-jaecoo-electric" size={32} /></div>
+  if (loading) return (
+    <div className="grid md:grid-cols-[3fr_2fr] gap-5 items-start animate-pulse">
+      <div className="space-y-5">
+        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-jaecoo-elevated rounded-2xl shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-5 bg-jaecoo-elevated rounded-full w-2/3" />
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-1/3" />
+            </div>
+          </div>
+          <div className="h-8 bg-jaecoo-elevated rounded-xl" />
+        </div>
+        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+          <div className="h-3 bg-jaecoo-elevated rounded-full w-24 mb-4" />
+          {[0,1,2,3].map(i => <div key={i} className="h-3 bg-jaecoo-elevated rounded-full w-full mb-2 last:mb-0" />)}
+        </div>
+      </div>
+      <div className="space-y-5">
+        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+          <div className="h-3 bg-jaecoo-elevated rounded-full w-16 mb-4" />
+          <div className="grid grid-cols-3 gap-4">
+            {[0,1,2].map(i => (
+              <div key={i} className="text-center space-y-2">
+                <div className="h-7 bg-jaecoo-elevated rounded-full" />
+                <div className="h-2.5 bg-jaecoo-elevated rounded-full w-3/4 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+          <div className="h-3 bg-jaecoo-elevated rounded-full w-28 mb-3" />
+          {[0,1,2,3,4].map(i => (
+            <div key={i} className="flex gap-3 py-2.5 border-b border-jaecoo-border last:border-0">
+              <div className="w-3.5 h-3.5 bg-jaecoo-elevated rounded shrink-0" />
+              <div className="h-3 bg-jaecoo-elevated rounded-full w-24" />
+              <div className="h-3 bg-jaecoo-elevated rounded-full flex-1 ml-auto" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 
   if (!ins) {
     return (
@@ -383,7 +425,7 @@ export default function InsurancePage() {
                 <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border">
                   <Phone size={14} className="text-emerald-400 shrink-0" />
                   <span className="text-xs text-jaecoo-muted w-36 shrink-0">Emergencias 24h</span>
-                  <a href={`tel:${ins.emergencyPhone}`} className="text-xs font-bold text-emerald-400 hover:underline">{ins.emergencyPhone}</a>
+                  <a href={`tel:${ins.emergencyPhone}`} className="text-xs font-bold text-emerald-400 hover:underline transition-colors">{ins.emergencyPhone}</a>
                 </div>
               )}
               {ins.agentName  && <InfoRow icon={User}  label="Mediador / agente" value={ins.agentName} />}
@@ -391,14 +433,14 @@ export default function InsurancePage() {
                 <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border last:border-0">
                   <Phone size={14} className="text-jaecoo-muted shrink-0" />
                   <span className="text-xs text-jaecoo-muted w-36 shrink-0">Tel. agente</span>
-                  <a href={`tel:${ins.agentPhone}`} className="text-xs font-semibold text-jaecoo-electric hover:underline">{ins.agentPhone}</a>
+                  <a href={`tel:${ins.agentPhone}`} className="text-xs font-semibold text-jaecoo-electric hover:underline transition-colors">{ins.agentPhone}</a>
                 </div>
               )}
               {ins.agentEmail && (
                 <div className="flex items-center gap-3 py-2.5 last:border-0">
                   <Mail size={14} className="text-jaecoo-muted shrink-0" />
                   <span className="text-xs text-jaecoo-muted w-36 shrink-0">Email agente</span>
-                  <a href={`mailto:${ins.agentEmail}`} className="text-xs font-semibold text-jaecoo-electric hover:underline truncate">{ins.agentEmail}</a>
+                  <a href={`mailto:${ins.agentEmail}`} className="text-xs font-semibold text-jaecoo-electric hover:underline truncate transition-colors">{ins.agentEmail}</a>
                 </div>
               )}
             </div>

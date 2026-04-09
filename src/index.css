@@ -25,11 +25,13 @@
 
   /* Energía eléctrica — cyan */
   --j-electric:       #22d3ee;
+  --j-electric-light: #67e8f9;
   --j-electric-dim:   rgba(34, 211, 238, 0.12);
   --j-electric-glow:  rgba(34, 211, 238, 0.25);
 
   /* Gasolina — ámbar */
   --j-fuel:           #fb923c;
+  --j-fuel-light:     #fcd34d;
   --j-fuel-dim:       rgba(251, 146, 60, 0.12);
   --j-fuel-glow:      rgba(251, 146, 60, 0.25);
 
@@ -151,14 +153,14 @@ html.light {
 
   /* Gradiente de texto — para valores destacados */
   .j-text-electric {
-    background: linear-gradient(90deg, var(--j-electric), #67e8f9);
+    background: linear-gradient(90deg, var(--j-electric), var(--j-electric-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .j-text-fuel {
-    background: linear-gradient(90deg, var(--j-fuel), #fcd34d);
+    background: linear-gradient(90deg, var(--j-fuel), var(--j-fuel-light));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
