@@ -836,7 +836,7 @@ function NextServiceCard({ services, currentOdo, onAdd }: { services: Maintenanc
       <div className="flex items-center justify-between mb-3">
         <div>
           <p className={`text-xs font-bold uppercase tracking-wide ${urgencyText.color}`}>{urgencyText.label}</p>
-          <p className="text-[11px] text-jaecoo-muted mt-0.5">Cada {MAINT_DAY_INTERVAL / 30} meses o {MAINT_KM_INTERVAL.toLocaleString('es-ES')} km</p>
+          <p className="text-[11px] text-jaecoo-muted mt-0.5">Cada {Math.round(MAINT_DAY_INTERVAL / 30)} meses o {MAINT_KM_INTERVAL.toLocaleString('es-ES')} km</p>
         </div>
         <Calendar size={20} className={urgencyText.color} />
       </div>
