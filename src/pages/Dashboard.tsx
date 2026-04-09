@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays, Wrench, ClipboardList } from 'lucide-react'
+import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays, Wrench, ClipboardList, AlertOctagon } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import StatCard from '../components/StatCard'
 import {
@@ -18,8 +18,8 @@ import {
   FUEL_MAX_RANGE_KM,
 } from '../utils/calculations'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import type { Insurance, Repair, MaintenanceService } from '../types'
-import { apiGetInsurance, apiGetRepairs, apiGetMaintenance } from '../services/api'
+import type { Insurance, Repair, MaintenanceService, AccidentReport } from '../types'
+import { apiGetInsurance, apiGetRepairs, apiGetMaintenance, apiGetAccidents } from '../services/api'
 
 const INSURANCE_TYPES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
   third_party:          { label: 'Terceros',                    color: 'text-jaecoo-muted bg-jaecoo-elevated',          icon: Shield      },
@@ -49,11 +49,13 @@ export default function Dashboard() {
   const [insurance, setInsurance] = useState<Insurance | null | undefined>(undefined)
   const [repairs, setRepairs] = useState<Repair[] | undefined>(undefined)
   const [maintenance, setMaintenance] = useState<MaintenanceService[] | undefined>(undefined)
+  const [accidents, setAccidents] = useState<AccidentReport[] | undefined>(undefined)
 
   useEffect(() => {
     apiGetInsurance().then(setInsurance).catch(() => setInsurance(null))
     apiGetRepairs().then(setRepairs).catch(() => setRepairs([]))
     apiGetMaintenance().then(setMaintenance).catch(() => setMaintenance([]))
+    apiGetAccidents().then(setAccidents).catch(() => setAccidents([]))
   }, [])
 
   if (isLoading) {
@@ -222,8 +224,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Seguro / Averías / Mantenimientos ── */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      {/* ── Seguro / Averías / Mantenimientos / Partes ── */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Seguro */}
         {(() => {
@@ -331,6 +333,41 @@ export default function Dashboard() {
                     </div>
                   )}
                   {(maintenance ?? []).length > 1 && <p className="text-[11px] text-jaecoo-muted mt-1">{(maintenance ?? []).length} servicios registrados</p>}
+                </>
+              )}
+            </Link>
+          )
+        })()}
+
+        {/* Partes de accidente */}
+        {(() => {
+          const list = accidents ?? []
+          const open = list.filter(a => a.status !== 'resolved')
+          const last = [...list].sort((a, b) => b.date.localeCompare(a.date))[0]
+          const hasOpen = open.length > 0
+          const STATUS: Record<string, { label: string; color: string }> = {
+            open:        { label: 'Abierto',    color: 'text-rose-400 bg-rose-500/10' },
+            in_progress: { label: 'En gestión', color: 'text-yellow-400 bg-yellow-400/10' },
+            resolved:    { label: 'Resuelto',   color: 'text-emerald-400 bg-emerald-500/10' },
+          }
+          return (
+            <Link to="/garage" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <AlertOctagon size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Partes</p>
+                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-rose-400 bg-rose-500/10 ml-1">{open.length} abierto{open.length > 1 ? 's' : ''}</span>}
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'}`} />
+              </div>
+              {!last ? (
+                <p className="text-sm text-jaecoo-muted">Sin partes registrados</p>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-jaecoo-primary truncate">{last.description}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${STATUS[last.status]?.color ?? ''}`}>{STATUS[last.status]?.label}</span>
+                    <span className="text-[11px] text-jaecoo-muted">{last.date}</span>
+                  </div>
+                  {list.length > 1 && <p className="text-[11px] text-jaecoo-muted mt-1">{list.length} partes en total</p>}
                 </>
               )}
             </Link>
