@@ -275,7 +275,7 @@ export default function Dashboard() {
           }
           const hasOpen = openRepairs.length > 0
           return (
-            <Link to="/taller" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=repairs" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <Wrench size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
                 <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Averías</p>
@@ -312,7 +312,7 @@ export default function Dashboard() {
             : null
           const alert = daysToNext !== null && daysToNext <= 30
           return (
-            <Link to="/taller" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-yellow-400/10 border-yellow-400/20 hover:border-yellow-400/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=maintenance" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-yellow-400/10 border-yellow-400/20 hover:border-yellow-400/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <ClipboardList size={15} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
                 <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>Mantenimiento</p>
@@ -351,7 +351,7 @@ export default function Dashboard() {
             resolved:    { label: 'Resuelto',   color: 'text-emerald-400 bg-emerald-500/10' },
           }
           return (
-            <Link to="/taller" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=accidents" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
                 <AlertOctagon size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
                 <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Partes</p>

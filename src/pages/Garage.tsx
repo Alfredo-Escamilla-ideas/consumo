@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Wrench, Zap, AlertTriangle, CheckCircle2, Clock, Plus, Pencil, Trash2,
   X, Loader2, ChevronDown, ChevronUp, Phone, ShieldCheck, Calendar,
@@ -927,12 +928,14 @@ function MaintenanceCard({ s, onEdit, onDelete }: { s: MaintenanceService; onEdi
 
 export default function Garage() {
   const { data } = useData()
+  const [searchParams] = useSearchParams()
   const [repairs, setRepairs] = useState<Repair[]>([])
   const [services, setServices] = useState<MaintenanceService[]>([])
   const [accidents, setAccidents] = useState<AccidentReport[]>([])
   const [insuranceCompany, setInsuranceCompany] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'repairs' | 'maintenance' | 'accidents'>('repairs')
+  const initialTab = (['repairs', 'maintenance', 'accidents'] as const).find(t => t === searchParams.get('tab')) ?? 'repairs'
+  const [tab, setTab] = useState<'repairs' | 'maintenance' | 'accidents'>(initialTab)
   const [repairModal, setRepairModal] = useState<Repair | null | false>(false)
   const [maintModal, setMaintModal]   = useState<MaintenanceService | null | false>(false)
   const [accidentModal, setAccidentModal] = useState<AccidentReport | null | false>(false)
