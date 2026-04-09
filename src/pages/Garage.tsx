@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Wrench, Zap, AlertTriangle, CheckCircle2, Clock, Plus, Pencil, Trash2,
   X, Loader2, ChevronDown, ChevronUp, Phone, ShieldCheck, Calendar,
-  Gauge, FileText, Euro, Car, ClipboardList,
+  Gauge, FileText, Euro, Car, ClipboardList, AlertOctagon, MapPin,
 } from 'lucide-react'
-import type { Repair, RepairType, RepairStatus, MaintenanceService, MaintenanceType } from '../types'
+import type { Repair, RepairType, RepairStatus, MaintenanceService, MaintenanceType, AccidentReport, AccidentStatus } from '../types'
 import {
   apiGetRepairs, apiAddRepair, apiUpdateRepair, apiDeleteRepair,
   apiGetMaintenance, apiAddMaintenance, apiUpdateMaintenance, apiDeleteMaintenance,
+  apiGetAccidents, apiAddAccident, apiUpdateAccident, apiDeleteAccident,
+  apiGetInsurance,
 } from '../services/api'
 import { useData } from '../context/DataContext'
 
@@ -94,6 +96,12 @@ const MAINT_TYPES: Record<MaintenanceType, string> = {
 
 const MAINT_KM_INTERVAL = 20000
 const MAINT_DAY_INTERVAL = 365
+
+const ACCIDENT_STATUS: Record<AccidentStatus, { label: string; color: string; dot: string }> = {
+  open:        { label: 'Abierto',    color: 'text-rose-400 bg-rose-500/10 border-rose-500/20',          dot: 'bg-rose-400'                 },
+  in_progress: { label: 'En gestión', color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',    dot: 'bg-yellow-400 animate-pulse' },
+  resolved:    { label: 'Resuelto',   color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', dot: 'bg-emerald-400'              },
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -421,6 +429,267 @@ function MaintenanceModal({ initial, currentOdo, onSave, onClose }: {
   )
 }
 
+// ─── AccidentModal ────────────────────────────────────────────────────────────
+
+const EMPTY_ACCIDENT: AccidentReport = {
+  id: '', date: new Date().toISOString().slice(0, 10),
+  description: '', partsAffected: [],
+  hasThirdParty: false, notifiedInsurance: false, status: 'open',
+}
+
+function AccidentModal({ initial, insuranceCompany, onSave, onClose }: {
+  initial: AccidentReport
+  insuranceCompany: string | null
+  onSave: (a: AccidentReport) => Promise<void>
+  onClose: () => void
+}) {
+  const [f, setF] = useState<AccidentReport>({ ...initial })
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [partSearch, setPartSearch] = useState('')
+
+  function set(k: keyof AccidentReport, v: unknown) { setF(p => ({ ...p, [k]: v })) }
+  function togglePart(p: string) {
+    setF(prev => ({
+      ...prev,
+      partsAffected: prev.partsAffected.includes(p)
+        ? prev.partsAffected.filter(x => x !== p)
+        : [...prev.partsAffected, p],
+    }))
+  }
+  const filteredParts = JAECOO7_PARTS.filter(p => p.toLowerCase().includes(partSearch.toLowerCase()))
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setSaveError(null)
+    try { await onSave({ ...f, id: f.id || crypto.randomUUID() }); onClose() }
+    catch (err) { setSaveError(err instanceof Error ? err.message : 'Error al guardar') }
+    finally { setSaving(false) }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-jaecoo-border sticky top-0 bg-jaecoo-card z-10">
+          <h2 className="text-sm font-bold text-jaecoo-primary flex items-center gap-2">
+            <AlertOctagon size={15} className="text-rose-400" />
+            {initial.id ? 'Editar parte' : 'Nuevo parte de accidente'}
+          </h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg text-jaecoo-muted hover:bg-jaecoo-elevated transition-colors"><X size={16} /></button>
+        </div>
+
+        <form onSubmit={submit} className="p-5 space-y-3">
+          {/* Estado */}
+          <div>
+            <p className={sect}>Estado del parte</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(Object.entries(ACCIDENT_STATUS) as [AccidentStatus, typeof ACCIDENT_STATUS[AccidentStatus]][]).map(([k, v]) => (
+                <button key={k} type="button" onClick={() => set('status', k)}
+                  className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-semibold transition-all
+                    ${f.status === k ? v.color : 'border-jaecoo-border text-jaecoo-muted hover:border-jaecoo-border-strong'}`}>
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${f.status === k ? v.dot : 'bg-jaecoo-muted'}`} />
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Datos del accidente */}
+          <div>
+            <p className={sect}>Datos del accidente</p>
+            <div className="grid grid-cols-2 gap-3 mb-2">
+              <div><label className={lbl}>Fecha *</label>
+                <input required type="date" className={inp} value={f.date} onChange={e => set('date', e.target.value)} /></div>
+              <div><label className={lbl}>Hora</label>
+                <input type="time" className={inp} value={f.time ?? ''} onChange={e => set('time', e.target.value || undefined)} /></div>
+            </div>
+            <div className="mb-2">
+              <label className={lbl}>Lugar / dirección</label>
+              <input className={inp} placeholder="Calle, ciudad…" value={f.location ?? ''} onChange={e => set('location', e.target.value || undefined)} />
+            </div>
+            <div><label className={lbl}>Kilómetros</label>
+              <input type="number" min="0" className={inp} placeholder="Odómetro" value={f.odometer ?? ''} onChange={e => set('odometer', e.target.value ? parseInt(e.target.value) : undefined)} /></div>
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className={lbl}>Descripción de lo ocurrido *</label>
+            <textarea required rows={3} className={`${inp} resize-none`} placeholder="Describe cómo ocurrió el accidente, circunstancias, culpabilidad…" value={f.description} onChange={e => set('description', e.target.value)} />
+          </div>
+
+          {/* Daños propios */}
+          <div>
+            <p className={sect}>Daños en el vehículo</p>
+            <div className="mb-2">
+              <label className={lbl}>Descripción de daños</label>
+              <textarea rows={2} className={`${inp} resize-none`} placeholder="Describe los daños visibles…" value={f.damageDescription ?? ''} onChange={e => set('damageDescription', e.target.value || undefined)} />
+            </div>
+            <input className={`${inp} mb-2`} placeholder="Buscar pieza…" value={partSearch} onChange={e => setPartSearch(e.target.value)} />
+            <div className="max-h-36 overflow-y-auto border border-jaecoo-border rounded-xl p-2 flex flex-wrap gap-1.5">
+              {filteredParts.map(p => (
+                <button key={p} type="button" onClick={() => togglePart(p)}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-all
+                    ${f.partsAffected.includes(p)
+                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                      : 'border-jaecoo-border text-jaecoo-muted hover:border-jaecoo-border-strong'}`}>
+                  {p}
+                </button>
+              ))}
+            </div>
+            {f.partsAffected.length > 0 && (
+              <p className="text-[10px] text-jaecoo-muted mt-1">{f.partsAffected.length} piezas afectadas</p>
+            )}
+          </div>
+
+          {/* Tercero */}
+          <div>
+            <p className={sect}>Tercero involucrado</p>
+            <button type="button" onClick={() => set('hasThirdParty', !f.hasThirdParty)}
+              className={`w-full flex items-center gap-2 p-3 rounded-xl border transition-all text-xs font-semibold mb-3
+                ${f.hasThirdParty ? 'border-jaecoo-fuel/40 bg-jaecoo-fuel-dim text-jaecoo-fuel' : 'border-jaecoo-border text-jaecoo-muted'}`}>
+              <Car size={14} /> {f.hasThirdParty ? 'Hay otro vehículo implicado' : 'Sin terceros involucrados'}
+            </button>
+            {f.hasThirdParty && (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={inp} placeholder="Nombre conductor" value={f.thirdPartyName ?? ''} onChange={e => set('thirdPartyName', e.target.value || undefined)} />
+                  <input className={inp} placeholder="Matrícula" value={f.thirdPartyPlate ?? ''} onChange={e => set('thirdPartyPlate', e.target.value || undefined)} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input className={inp} placeholder="Aseguradora del tercero" value={f.thirdPartyInsurance ?? ''} onChange={e => set('thirdPartyInsurance', e.target.value || undefined)} />
+                  <input className={inp} placeholder="Nº póliza del tercero" value={f.thirdPartyPolicy ?? ''} onChange={e => set('thirdPartyPolicy', e.target.value || undefined)} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Gestión */}
+          <div>
+            <p className={sect}>Gestión del parte</p>
+            <button type="button" onClick={() => set('notifiedInsurance', !f.notifiedInsurance)}
+              className={`w-full flex items-center gap-2 p-3 rounded-xl border transition-all text-xs font-semibold mb-2
+                ${f.notifiedInsurance ? 'border-jaecoo-electric/40 bg-jaecoo-electric-dim text-jaecoo-electric' : 'border-jaecoo-border text-jaecoo-muted'}`}>
+              <ShieldCheck size={14} />
+              {f.notifiedInsurance
+                ? `Aseguradora notificada${insuranceCompany ? ` · ${insuranceCompany}` : ''}`
+                : `Notificar a la aseguradora${insuranceCompany ? ` · ${insuranceCompany}` : ''}`}
+            </button>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <input className={inp} placeholder="Nº expediente" value={f.claimNumber ?? ''} onChange={e => set('claimNumber', e.target.value || undefined)} />
+              <input type="number" step="0.01" min="0" className={inp} placeholder="Coste reparación (€)" value={f.repairCost ?? ''} onChange={e => set('repairCost', e.target.value ? parseFloat(e.target.value) : undefined)} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <input className={inp} placeholder="Taller de reparación" value={f.workshop ?? ''} onChange={e => set('workshop', e.target.value || undefined)} />
+              <div>
+                <label className={lbl}>Fecha resolución</label>
+                <input type="date" className={inp} value={f.resolutionDate ?? ''} onChange={e => set('resolutionDate', e.target.value || undefined)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Notas */}
+          <div>
+            <label className={lbl}>Notas</label>
+            <textarea rows={2} className={`${inp} resize-none`} placeholder="Testigos, circunstancias adicionales, observaciones…" value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} />
+          </div>
+
+          {saveError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2">{saveError}</p>}
+          <button type="submit" disabled={saving}
+            className="w-full py-3 bg-rose-500 text-white font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
+            {saving && <Loader2 size={16} className="animate-spin" />}
+            {initial.id ? 'Guardar cambios' : 'Registrar parte'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ─── AccidentCard ─────────────────────────────────────────────────────────────
+
+function AccidentCard({ a, onEdit, onDelete }: { a: AccidentReport; onEdit: () => void; onDelete: () => void }) {
+  const [open, setOpen] = useState(false)
+  const status = ACCIDENT_STATUS[a.status]
+
+  return (
+    <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl overflow-hidden transition-all">
+      <div className="flex items-center gap-3 p-4 cursor-pointer" onClick={() => setOpen(v => !v)}>
+        <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 shrink-0"><AlertOctagon size={16} /></div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${status.color}`}>
+              <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${status.dot}`} />{status.label}
+            </span>
+            <span className="text-[10px] text-jaecoo-muted">
+              {a.date}{a.time ? ` · ${a.time}` : ''}{a.odometer ? ` · ${a.odometer.toLocaleString('es-ES')} km` : ''}
+            </span>
+          </div>
+          <p className="text-sm font-semibold text-jaecoo-primary truncate mt-0.5">{a.description}</p>
+          {a.location && <p className="text-[10px] text-jaecoo-muted flex items-center gap-1 mt-0.5"><MapPin size={9} />{a.location}</p>}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {a.repairCost != null && <span className="text-xs font-bold text-jaecoo-secondary hidden sm:block">{fmtPrice(a.repairCost)}</span>}
+          {open ? <ChevronUp size={14} className="text-jaecoo-muted" /> : <ChevronDown size={14} className="text-jaecoo-muted" />}
+        </div>
+      </div>
+
+      {open && (
+        <div className="px-4 pb-4 border-t border-jaecoo-border space-y-3 pt-3">
+          {a.damageDescription && (
+            <div>
+              <p className="text-[10px] text-jaecoo-muted uppercase font-bold tracking-wide mb-1">Daños</p>
+              <p className="text-xs text-jaecoo-secondary">{a.damageDescription}</p>
+            </div>
+          )}
+
+          {a.partsAffected.length > 0 && (
+            <div>
+              <p className="text-[10px] text-jaecoo-muted uppercase font-bold tracking-wide mb-1.5">Piezas afectadas</p>
+              <div className="flex flex-wrap gap-1.5">
+                {a.partsAffected.map(p => (
+                  <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400">{p}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {a.hasThirdParty && (
+            <div>
+              <p className="text-[10px] text-jaecoo-muted uppercase font-bold tracking-wide mb-1.5">Tercero</p>
+              <div className="grid grid-cols-2 gap-2">
+                {a.thirdPartyName && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Conductor</p><p className="text-xs font-semibold text-jaecoo-secondary">{a.thirdPartyName}</p></div>}
+                {a.thirdPartyPlate && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Matrícula</p><p className="text-xs font-semibold text-jaecoo-secondary font-mono">{a.thirdPartyPlate}</p></div>}
+                {a.thirdPartyInsurance && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Aseguradora</p><p className="text-xs font-semibold text-jaecoo-secondary">{a.thirdPartyInsurance}</p></div>}
+                {a.thirdPartyPolicy && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Póliza</p><p className="text-xs font-semibold text-jaecoo-secondary">{a.thirdPartyPolicy}</p></div>}
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {a.workshop && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Taller</p><p className="text-xs font-semibold text-jaecoo-secondary">{a.workshop}</p></div>}
+            {a.repairCost != null && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Coste</p><p className="text-xs font-bold text-jaecoo-primary">{fmtPrice(a.repairCost)}</p></div>}
+            {a.resolutionDate && <div><p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Resolución</p><p className="text-xs font-semibold text-jaecoo-secondary">{a.resolutionDate}</p></div>}
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-3">
+              {a.notifiedInsurance && <span className="text-[10px] flex items-center gap-1 text-jaecoo-electric"><ShieldCheck size={11} /> Aseg. notificada</span>}
+              {a.claimNumber && <span className="text-[10px] flex items-center gap-1 text-jaecoo-muted"><FileText size={11} /> Expte. {a.claimNumber}</span>}
+            </div>
+            <div className="flex gap-1">
+              <button onClick={onEdit} className="p-1.5 rounded-lg text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim transition-colors"><Pencil size={13} /></button>
+              <button onClick={onDelete} className="p-1.5 rounded-lg text-jaecoo-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors"><Trash2 size={13} /></button>
+            </div>
+          </div>
+
+          {a.notes && <p className="text-xs text-jaecoo-secondary italic border-t border-jaecoo-border pt-2">{a.notes}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── RepairCard ───────────────────────────────────────────────────────────────
 
 function RepairCard({ r, onEdit, onDelete }: { r: Repair; onEdit: () => void; onDelete: () => void }) {
@@ -660,17 +929,24 @@ export default function Garage() {
   const { data } = useData()
   const [repairs, setRepairs] = useState<Repair[]>([])
   const [services, setServices] = useState<MaintenanceService[]>([])
+  const [accidents, setAccidents] = useState<AccidentReport[]>([])
+  const [insuranceCompany, setInsuranceCompany] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'repairs' | 'maintenance'>('repairs')
+  const [tab, setTab] = useState<'repairs' | 'maintenance' | 'accidents'>('repairs')
   const [repairModal, setRepairModal] = useState<Repair | null | false>(false)
   const [maintModal, setMaintModal]   = useState<MaintenanceService | null | false>(false)
+  const [accidentModal, setAccidentModal] = useState<AccidentReport | null | false>(false)
 
   const allRecords = [...data.electricCharges, ...data.fuelRefuels]
   const currentOdo = allRecords.length > 0 ? Math.max(...allRecords.map(r => r.odometer)) : 0
 
   const load = useCallback(async () => {
-    const [r, m] = await Promise.all([apiGetRepairs(), apiGetMaintenance()])
-    setRepairs(r); setServices(m); setLoading(false)
+    const [r, m, a, ins] = await Promise.all([
+      apiGetRepairs(), apiGetMaintenance(), apiGetAccidents(), apiGetInsurance(),
+    ])
+    setRepairs(r); setServices(m); setAccidents(a)
+    if (ins) setInsuranceCompany(ins.company)
+    setLoading(false)
   }, [])
 
   useEffect(() => { load() }, [load])
@@ -690,6 +966,14 @@ export default function Garage() {
   async function deleteMaint(id: string) {
     if (!confirm('¿Eliminar esta revisión?')) return
     await apiDeleteMaintenance(id); setServices(p => p.filter(x => x.id !== id))
+  }
+  async function saveAccident(a: AccidentReport) {
+    if (accidents.find(x => x.id === a.id)) { await apiUpdateAccident(a); setAccidents(p => p.map(x => x.id === a.id ? a : x)) }
+    else { await apiAddAccident(a); setAccidents(p => [a, ...p]) }
+  }
+  async function deleteAccident(id: string) {
+    if (!confirm('¿Eliminar este parte?')) return
+    await apiDeleteAccident(id); setAccidents(p => p.filter(x => x.id !== id))
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-jaecoo-electric" size={32} /></div>
@@ -716,6 +1000,17 @@ export default function Garage() {
             ${tab === 'maintenance' ? 'bg-jaecoo-card shadow-j-card text-jaecoo-primary' : 'text-jaecoo-muted hover:text-jaecoo-secondary'}`}>
           <ClipboardList size={15} />
           Revisiones
+        </button>
+        <button onClick={() => setTab('accidents')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all
+            ${tab === 'accidents' ? 'bg-jaecoo-card shadow-j-card text-jaecoo-primary' : 'text-jaecoo-muted hover:text-jaecoo-secondary'}`}>
+          <AlertOctagon size={15} />
+          Partes
+          {accidents.filter(a => a.status !== 'resolved').length > 0 && (
+            <span className="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {accidents.filter(a => a.status !== 'resolved').length}
+            </span>
+          )}
         </button>
       </div>
 
@@ -787,12 +1082,71 @@ export default function Garage() {
         </div>
       )}
 
+      {/* ── PARTES DE ACCIDENTE ── */}
+      {tab === 'accidents' && (
+        <div className="space-y-4">
+          {/* Insurance reference banner */}
+          {insuranceCompany && (
+            <div className="flex items-center gap-2.5 px-4 py-3 bg-jaecoo-elevated border border-jaecoo-border rounded-2xl">
+              <ShieldCheck size={14} className="text-jaecoo-electric shrink-0" />
+              <p className="text-xs text-jaecoo-secondary">
+                Seguro: <span className="font-semibold text-jaecoo-primary">{insuranceCompany}</span>
+                <span className="text-jaecoo-muted"> · configura los datos completos en la sección Seguro</span>
+              </p>
+            </div>
+          )}
+
+          {/* Summary stats */}
+          {accidents.length > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-jaecoo-card border border-rose-500/20 rounded-2xl p-3 text-center">
+                <p className="text-xl font-bold text-rose-400">{accidents.filter(a => a.status === 'open').length}</p>
+                <p className="text-[10px] text-jaecoo-muted mt-0.5">Abiertos</p>
+              </div>
+              <div className="bg-jaecoo-card border border-yellow-400/20 rounded-2xl p-3 text-center">
+                <p className="text-xl font-bold text-yellow-400">{accidents.filter(a => a.status === 'in_progress').length}</p>
+                <p className="text-[10px] text-jaecoo-muted mt-0.5">En gestión</p>
+              </div>
+              <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-3 text-center">
+                <p className="text-lg font-bold text-jaecoo-primary">{fmtPrice(accidents.reduce((s, a) => s + (a.repairCost ?? 0), 0))}</p>
+                <p className="text-[10px] text-jaecoo-muted mt-0.5">Gasto total</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-jaecoo-muted">{accidents.length} parte{accidents.length !== 1 ? 's' : ''} registrado{accidents.length !== 1 ? 's' : ''}</p>
+            <button onClick={() => setAccidentModal(null)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-rose-500 text-white rounded-xl text-xs font-bold hover:brightness-110 transition-all">
+              <Plus size={13} /> Nuevo parte
+            </button>
+          </div>
+
+          {accidents.length === 0 ? (
+            <div className="border-2 border-dashed border-jaecoo-border rounded-2xl p-8 text-center">
+              <AlertOctagon size={28} className="text-jaecoo-muted mx-auto mb-2" />
+              <p className="text-sm font-semibold text-jaecoo-secondary">Sin partes registrados</p>
+              <p className="text-xs text-jaecoo-muted mt-1">¡Ojalá siga siendo así!</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {accidents.map(a => (
+                <AccidentCard key={a.id} a={a} onEdit={() => setAccidentModal(a)} onDelete={() => deleteAccident(a.id)} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Modals */}
       {repairModal !== false && (
         <RepairModal initial={repairModal ?? EMPTY_REPAIR} onSave={saveRepair} onClose={() => setRepairModal(false)} />
       )}
       {maintModal !== false && (
         <MaintenanceModal initial={maintModal ?? EMPTY_MAINT} currentOdo={currentOdo} onSave={saveMaint} onClose={() => setMaintModal(false)} />
+      )}
+      {accidentModal !== false && (
+        <AccidentModal initial={accidentModal ?? EMPTY_ACCIDENT} insuranceCompany={insuranceCompany} onSave={saveAccident} onClose={() => setAccidentModal(false)} />
       )}
     </div>
   )

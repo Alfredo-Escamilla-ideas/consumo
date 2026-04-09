@@ -1,4 +1,4 @@
-import type { ElectricCharge, FuelRefuel, Tire, Insurance, Repair, MaintenanceService } from '../types'
+import type { ElectricCharge, FuelRefuel, Tire, Insurance, Repair, MaintenanceService, AccidentReport } from '../types'
 
 const BASE = '/jaecoo7/api'
 
@@ -136,6 +136,12 @@ export async function apiGetMaintenance(): Promise<MaintenanceService[]> { retur
 export async function apiAddMaintenance(s: MaintenanceService): Promise<void> { await req('/maintenance.php', { method: 'POST', body: JSON.stringify(s) }) }
 export async function apiUpdateMaintenance(s: MaintenanceService): Promise<void> { await req(`/maintenance.php?id=${s.id}`, { method: 'PUT', body: JSON.stringify(s) }) }
 export async function apiDeleteMaintenance(id: string): Promise<void> { await req(`/maintenance.php?id=${id}`, { method: 'DELETE' }) }
+
+// Accidents
+export async function apiGetAccidents(): Promise<AccidentReport[]> { return req('/accidents.php') }
+export async function apiAddAccident(a: AccidentReport): Promise<void> { await req('/accidents.php', { method: 'POST', body: JSON.stringify(a) }) }
+export async function apiUpdateAccident(a: AccidentReport): Promise<void> { await req(`/accidents.php?id=${a.id}`, { method: 'PUT', body: JSON.stringify(a) }) }
+export async function apiDeleteAccident(id: string): Promise<void> { await req(`/accidents.php?id=${id}`, { method: 'DELETE' }) }
 
 // Insurance
 export async function apiGetInsurance(): Promise<Insurance | null> {

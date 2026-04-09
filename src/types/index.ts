@@ -112,6 +112,32 @@ export interface Tire {
   notes?: string
 }
 
+// ── Accidents ────────────────────────────────────────────────────────────────
+export type AccidentStatus = 'open' | 'in_progress' | 'resolved'
+
+export interface AccidentReport {
+  id: string
+  date: string
+  time?: string
+  location?: string
+  odometer?: number
+  description: string
+  partsAffected: string[]
+  damageDescription?: string
+  hasThirdParty: boolean
+  thirdPartyName?: string
+  thirdPartyPlate?: string
+  thirdPartyInsurance?: string
+  thirdPartyPolicy?: string
+  notifiedInsurance: boolean
+  claimNumber?: string
+  status: AccidentStatus
+  repairCost?: number
+  workshop?: string
+  resolutionDate?: string
+  notes?: string
+}
+
 export interface AppData {
   electricCharges: ElectricCharge[]
   fuelRefuels: FuelRefuel[]
