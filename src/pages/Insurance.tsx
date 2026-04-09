@@ -268,134 +268,146 @@ export default function InsurancePage() {
   const monthly   = ins.annualPrice != null ? ins.annualPrice / 12 : null
 
   return (
-    <div className="space-y-5 max-w-2xl">
+    <>
+      <div className="grid md:grid-cols-[3fr_2fr] gap-5 items-start">
 
-      {/* Hero card */}
-      <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${typeInfo.color}`}>
-              <TypeIcon size={22} />
+        {/* LEFT COLUMN: Hero, Coverages, Notes */}
+        <div className="space-y-5">
+
+          {/* Hero card */}
+          <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${typeInfo.color}`}>
+                  <TypeIcon size={22} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-lg font-bold text-jaecoo-primary truncate">{ins.company}</p>
+                  <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${typeInfo.color}`}>{typeInfo.label}</span>
+                </div>
+              </div>
+              <button onClick={() => setEditing(true)}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim border border-jaecoo-border hover:border-jaecoo-electric/30 transition-all">
+                <Pencil size={12} /> Editar
+              </button>
             </div>
-            <div className="min-w-0">
-              <p className="text-lg font-bold text-jaecoo-primary truncate">{ins.company}</p>
-              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5 ${typeInfo.color}`}>{typeInfo.label}</span>
-            </div>
+
+            {/* Expiry alert */}
+            {expiry && (
+              <div className={`mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold ${expiry.color}`}>
+                <AlertTriangle size={13} className="shrink-0" />
+                {expiry.label}
+                {ins.autoRenewal && <span className="ml-auto flex items-center gap-1 font-normal opacity-80"><RefreshCw size={11} /> Auto-renovación</span>}
+              </div>
+            )}
           </div>
-          <button onClick={() => setEditing(true)}
-            className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim border border-jaecoo-border hover:border-jaecoo-electric/30 transition-all">
-            <Pencil size={12} /> Editar
-          </button>
+
+          {/* Coverages */}
+          {ins.coverages.length > 0 && (
+            <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-3 flex items-center gap-2">
+                <CheckCircle2 size={13} /> Coberturas incluidas
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                {ins.coverages.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />
+                    <span className="text-xs text-jaecoo-secondary">{c}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {ins.notes && (
+            <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-2">Notas</h3>
+              <p className="text-xs text-jaecoo-secondary leading-relaxed whitespace-pre-wrap">{ins.notes}</p>
+            </div>
+          )}
+
         </div>
 
-        {/* Expiry alert */}
-        {expiry && (
-          <div className={`mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold ${expiry.color}`}>
-            <AlertTriangle size={13} className="shrink-0" />
-            {expiry.label}
-            {ins.autoRenewal && <span className="ml-auto flex items-center gap-1 font-normal opacity-80"><RefreshCw size={11} /> Auto-renovación</span>}
+        {/* RIGHT COLUMN: Pricing, Policy details, Contact */}
+        <div className="space-y-5">
+
+          {/* Pricing */}
+          {(ins.annualPrice != null || ins.excessAmount != null) && (
+            <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-3 flex items-center gap-2">
+                <Euro size={13} /> Precio
+              </h3>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                {ins.annualPrice != null && (
+                  <div>
+                    <p className="text-2xl font-bold text-jaecoo-primary">{ins.annualPrice.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
+                    <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Prima anual</p>
+                  </div>
+                )}
+                {monthly != null && (
+                  <div>
+                    <p className="text-2xl font-bold text-jaecoo-electric">{monthly.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
+                    <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Al mes</p>
+                  </div>
+                )}
+                {ins.excessAmount != null && (
+                  <div>
+                    <p className="text-2xl font-bold text-jaecoo-fuel">{ins.excessAmount.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
+                    <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Franquicia</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Policy details */}
+          <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-1 flex items-center gap-2">
+              <FileText size={13} /> Datos de la póliza
+            </h3>
+            {ins.policyNumber && <InfoRow icon={Hash}         label="Número de póliza" value={ins.policyNumber} highlight />}
+            {ins.startDate    && <InfoRow icon={CalendarDays} label="Fecha de inicio"   value={ins.startDate} />}
+            {ins.endDate      && <InfoRow icon={CalendarDays} label="Vencimiento"       value={ins.endDate} highlight />}
+            <InfoRow icon={RefreshCw} label="Renovación auto." value={ins.autoRenewal ? 'Sí' : 'No'} />
+            <InfoRow icon={TypeIcon}  label="Tipo de cobertura" value={typeInfo.label} />
           </div>
-        )}
+
+          {/* Contact */}
+          {(ins.emergencyPhone || ins.agentName || ins.agentPhone || ins.agentEmail) && (
+            <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-1 flex items-center gap-2">
+                <Phone size={13} /> Contacto
+              </h3>
+              {ins.emergencyPhone && (
+                <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border">
+                  <Phone size={14} className="text-emerald-400 shrink-0" />
+                  <span className="text-xs text-jaecoo-muted w-36 shrink-0">Emergencias 24h</span>
+                  <a href={`tel:${ins.emergencyPhone}`} className="text-xs font-bold text-emerald-400 hover:underline">{ins.emergencyPhone}</a>
+                </div>
+              )}
+              {ins.agentName  && <InfoRow icon={User}  label="Mediador / agente" value={ins.agentName} />}
+              {ins.agentPhone && (
+                <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border last:border-0">
+                  <Phone size={14} className="text-jaecoo-muted shrink-0" />
+                  <span className="text-xs text-jaecoo-muted w-36 shrink-0">Tel. agente</span>
+                  <a href={`tel:${ins.agentPhone}`} className="text-xs font-semibold text-jaecoo-electric hover:underline">{ins.agentPhone}</a>
+                </div>
+              )}
+              {ins.agentEmail && (
+                <div className="flex items-center gap-3 py-2.5 last:border-0">
+                  <Mail size={14} className="text-jaecoo-muted shrink-0" />
+                  <span className="text-xs text-jaecoo-muted w-36 shrink-0">Email agente</span>
+                  <a href={`mailto:${ins.agentEmail}`} className="text-xs font-semibold text-jaecoo-electric hover:underline truncate">{ins.agentEmail}</a>
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
-
-      {/* Pricing */}
-      {(ins.annualPrice != null || ins.excessAmount != null) && (
-        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-3 flex items-center gap-2">
-            <Euro size={13} /> Precio
-          </h3>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            {ins.annualPrice != null && (
-              <div>
-                <p className="text-2xl font-bold text-jaecoo-primary">{ins.annualPrice.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
-                <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Prima anual</p>
-              </div>
-            )}
-            {monthly != null && (
-              <div>
-                <p className="text-2xl font-bold text-jaecoo-electric">{monthly.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
-                <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Al mes</p>
-              </div>
-            )}
-            {ins.excessAmount != null && (
-              <div>
-                <p className="text-2xl font-bold text-jaecoo-fuel">{ins.excessAmount.toFixed(2)}<span className="text-sm font-normal text-jaecoo-muted"> €</span></p>
-                <p className="text-[10px] text-jaecoo-muted uppercase tracking-wide mt-0.5">Franquicia</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Policy details */}
-      <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-1 flex items-center gap-2">
-          <FileText size={13} /> Datos de la póliza
-        </h3>
-        {ins.policyNumber && <InfoRow icon={Hash}         label="Número de póliza" value={ins.policyNumber} highlight />}
-        {ins.startDate    && <InfoRow icon={CalendarDays} label="Fecha de inicio"   value={ins.startDate} />}
-        {ins.endDate      && <InfoRow icon={CalendarDays} label="Vencimiento"       value={ins.endDate} highlight />}
-        <InfoRow icon={RefreshCw} label="Renovación auto." value={ins.autoRenewal ? 'Sí' : 'No'} />
-        <InfoRow icon={TypeIcon}  label="Tipo de cobertura" value={typeInfo.label} />
-      </div>
-
-      {/* Contact */}
-      {(ins.emergencyPhone || ins.agentName || ins.agentPhone || ins.agentEmail) && (
-        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-1 flex items-center gap-2">
-            <Phone size={13} /> Contacto
-          </h3>
-          {ins.emergencyPhone && (
-            <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border">
-              <Phone size={14} className="text-emerald-400 shrink-0" />
-              <span className="text-xs text-jaecoo-muted w-36 shrink-0">Emergencias 24h</span>
-              <a href={`tel:${ins.emergencyPhone}`} className="text-xs font-bold text-emerald-400 hover:underline">{ins.emergencyPhone}</a>
-            </div>
-          )}
-          {ins.agentName  && <InfoRow icon={User}  label="Mediador / agente" value={ins.agentName} />}
-          {ins.agentPhone && (
-            <div className="flex items-center gap-3 py-2.5 border-b border-jaecoo-border last:border-0">
-              <Phone size={14} className="text-jaecoo-muted shrink-0" />
-              <span className="text-xs text-jaecoo-muted w-36 shrink-0">Tel. agente</span>
-              <a href={`tel:${ins.agentPhone}`} className="text-xs font-semibold text-jaecoo-electric hover:underline">{ins.agentPhone}</a>
-            </div>
-          )}
-          {ins.agentEmail && (
-            <div className="flex items-center gap-3 py-2.5 last:border-0">
-              <Mail size={14} className="text-jaecoo-muted shrink-0" />
-              <span className="text-xs text-jaecoo-muted w-36 shrink-0">Email agente</span>
-              <a href={`mailto:${ins.agentEmail}`} className="text-xs font-semibold text-jaecoo-electric hover:underline truncate">{ins.agentEmail}</a>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Coverages */}
-      {ins.coverages.length > 0 && (
-        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-3 flex items-center gap-2">
-            <CheckCircle2 size={13} /> Coberturas incluidas
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
-            {ins.coverages.map((c, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />
-                <span className="text-xs text-jaecoo-secondary">{c}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Notes */}
-      {ins.notes && (
-        <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-jaecoo-muted mb-2">Notas</h3>
-          <p className="text-xs text-jaecoo-secondary leading-relaxed whitespace-pre-wrap">{ins.notes}</p>
-        </div>
-      )}
 
       {editing && <InsuranceModal initial={ins} onSave={handleSave} onClose={() => setEditing(false)} />}
-    </div>
+    </>
   )
 }
