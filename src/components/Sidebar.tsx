@@ -3,6 +3,7 @@ import {
   LayoutDashboard, Zap, Fuel, BarChart3, Settings,
   Menu, X, Car, Disc3, ShieldCheck, Wrench,
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 interface SidebarProps {
   open: boolean
@@ -21,6 +22,8 @@ const links = [
 ]
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
+  const { vehicleModel } = useAuth()
+  const isGasOnly = vehicleModel === 'Jaecoo 7 Gasolina'
   return (
     <>
       {/* Mobile overlay */}
@@ -62,42 +65,58 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* Nav links */}
         <nav className="flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto scrollbar-hide">
-          {links.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              title={!open ? label : undefined}
-              onClick={() => { if (window.innerWidth < 1024) onClose() }}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                transition-all duration-150 group
-                ${isActive
-                  ? 'bg-jaecoo-electric-dim text-jaecoo-electric'
-                  : 'text-jaecoo-secondary hover:bg-jaecoo-elevated hover:text-jaecoo-primary'}
-              `}
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon
-                    size={18}
-                    className={`shrink-0 transition-colors ${
-                      isActive
-                        ? 'text-jaecoo-electric'
-                        : 'text-jaecoo-muted group-hover:text-jaecoo-secondary'
-                    }`}
-                  />
+          {links.map(({ to, icon: Icon, label }) => {
+            const disabled = to === '/recargas' && isGasOnly
+            if (disabled) {
+              return (
+                <div
+                  key={to}
+                  title={open ? 'No disponible en Jaecoo 7 Gasolina' : label}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium opacity-30 cursor-not-allowed select-none"
+                >
+                  <Icon size={18} className="shrink-0 text-jaecoo-muted" />
                   <span className={`truncate transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0 lg:hidden'}`}>
                     {label}
                   </span>
-                  {/* Indicador activo */}
-                  {isActive && (
-                    <span className={`ml-auto w-1.5 h-1.5 rounded-full bg-jaecoo-electric shrink-0 ${open ? '' : 'hidden'}`} />
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
+                </div>
+              )
+            }
+            return (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === '/'}
+                title={!open ? label : undefined}
+                onClick={() => { if (window.innerWidth < 1024) onClose() }}
+                className={({ isActive }) => `
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                  transition-all duration-150 group
+                  ${isActive
+                    ? 'bg-jaecoo-electric-dim text-jaecoo-electric'
+                    : 'text-jaecoo-secondary hover:bg-jaecoo-elevated hover:text-jaecoo-primary'}
+                `}
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      size={18}
+                      className={`shrink-0 transition-colors ${
+                        isActive
+                          ? 'text-jaecoo-electric'
+                          : 'text-jaecoo-muted group-hover:text-jaecoo-secondary'
+                      }`}
+                    />
+                    <span className={`truncate transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0 lg:hidden'}`}>
+                      {label}
+                    </span>
+                    {isActive && (
+                      <span className={`ml-auto w-1.5 h-1.5 rounded-full bg-jaecoo-electric shrink-0 ${open ? '' : 'hidden'}`} />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            )
+          })}
         </nav>
 
         {/* Footer */}

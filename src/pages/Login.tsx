@@ -52,7 +52,7 @@ export default function Login() {
   const [tab, setTab] = useState<'login' | 'register'>('login')
   const [plate, setPlate] = useState('')
   const [password, setPassword] = useState('')
-  const [model, setModel] = useState('Jaecoo 7 PHEV')
+  const [model, setModel] = useState<'Jaecoo 7 PHEV' | 'Jaecoo 7 Gasolina'>('Jaecoo 7 PHEV')
   const [initialOdometer, setInitialOdometer] = useState('')
   const [initialBattery, setInitialBattery] = useState('100')
   const [initialFuel, setInitialFuel] = useState('60')
@@ -238,13 +238,19 @@ export default function Login() {
                     <label className="block text-xs font-semibold text-jaecoo-muted uppercase tracking-wide mb-1.5">
                       Modelo del vehículo
                     </label>
-                    <input
-                      type="text"
-                      placeholder="Jaecoo 7 PHEV"
+                    <select
                       value={model}
-                      onChange={e => setModel(e.target.value)}
+                      onChange={e => {
+                        const v = e.target.value as 'Jaecoo 7 PHEV' | 'Jaecoo 7 Gasolina'
+                        setModel(v)
+                        if (v === 'Jaecoo 7 Gasolina') setInitialBattery('0')
+                        else setInitialBattery('100')
+                      }}
                       className={inp}
-                    />
+                    >
+                      <option value="Jaecoo 7 PHEV">Jaecoo 7 PHEV</option>
+                      <option value="Jaecoo 7 Gasolina">Jaecoo 7 Gasolina</option>
+                    </select>
                   </div>
 
                   <div className="bg-jaecoo-elevated rounded-xl border border-jaecoo-border p-4 space-y-3">
@@ -252,7 +258,7 @@ export default function Login() {
                       Estado inicial del vehículo
                     </p>
                     <p className="text-xs text-jaecoo-muted -mt-1">
-                      Recomendamos registrar con batería al 100% y depósito lleno para mayor precisión.
+                      Recomendamos registrar con depósito lleno para mayor precisión.
                     </p>
                     <div>
                       <label className="block text-xs font-medium text-jaecoo-muted mb-1">
@@ -267,21 +273,23 @@ export default function Login() {
                         className={inp}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-medium text-jaecoo-muted mb-1">
-                          Batería actual (%)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          placeholder="100"
-                          value={initialBattery}
-                          onChange={e => setInitialBattery(e.target.value)}
-                          className={inp}
-                        />
-                      </div>
+                    <div className={model === 'Jaecoo 7 Gasolina' ? 'block' : 'grid grid-cols-2 gap-3'}>
+                      {model === 'Jaecoo 7 PHEV' && (
+                        <div>
+                          <label className="block text-xs font-medium text-jaecoo-muted mb-1">
+                            Batería actual (%)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="100"
+                            value={initialBattery}
+                            onChange={e => setInitialBattery(e.target.value)}
+                            className={inp}
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-xs font-medium text-jaecoo-muted mb-1">
                           Combustible (litros)
