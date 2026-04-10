@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Zap, Fuel, Euro, Route, Leaf, TrendingUp, ChevronRight, Loader2, BatteryCharging, Gauge, PiggyBank, Shield, ShieldCheck, ShieldAlert, Phone, CalendarDays, Wrench, ClipboardList, AlertOctagon } from 'lucide-react'
 import { useData } from '../context/DataContext'
+import { useAuth } from '../context/AuthContext'
 import StatCard from '../components/StatCard'
 import {
   calcElectricStats,
@@ -46,6 +47,8 @@ const TOOLTIP_STYLE = {
 export default function Dashboard() {
   const { data, isLoading } = useData()
   const { electricCharges, fuelRefuels } = data
+  const { vehicleModel } = useAuth()
+  const isGasOnly = vehicleModel === 'Jaecoo 7 Gasolina'
   const [insurance, setInsurance] = useState<Insurance | null | undefined>(undefined)
   const [repairs, setRepairs] = useState<Repair[] | undefined>(undefined)
   const [maintenance, setMaintenance] = useState<MaintenanceService[] | undefined>(undefined)
@@ -171,9 +174,9 @@ export default function Dashboard() {
 
       {/* ── Estado actual del vehículo ── */}
       {hasData && (
-        <div className="grid sm:grid-cols-3 gap-4">
-          {/* Electric autonomy */}
-          <Link to="/recargas" className="bg-jaecoo-electric-dim border border-jaecoo-electric/20 hover:border-jaecoo-electric/40 hover:shadow-j-electric rounded-2xl p-4 transition-all group">
+        <div className={`grid gap-4 ${isGasOnly ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
+          {/* Electric autonomy — PHEV only */}
+          {!isGasOnly && <Link to="/recargas" className="bg-jaecoo-electric-dim border border-jaecoo-electric/20 hover:border-jaecoo-electric/40 hover:shadow-j-electric rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <BatteryCharging size={16} className="text-jaecoo-electric" />
               <p className="text-xs text-jaecoo-electric font-bold uppercase tracking-wide">Autonomía eléctrica</p>
@@ -194,7 +197,7 @@ export default function Dashboard() {
             ) : (
               <p className="text-sm text-jaecoo-secondary mt-2">Sin datos de recarga</p>
             )}
-          </Link>
+          </Link>}
 
           {/* Fuel autonomy */}
           <Link to="/repostajes" className="bg-jaecoo-fuel-dim border border-jaecoo-fuel/20 hover:border-jaecoo-fuel/40 hover:shadow-j-fuel rounded-2xl p-4 transition-all group">
@@ -425,7 +428,7 @@ export default function Dashboard() {
         <StatCard title="Km totales" value={`${formatNumber(combined.totalKm, 0)} km`} icon={Route} color="slate" />
         <StatCard title="Gasto total" value={formatCurrency(combined.totalCost)} icon={Euro} color="violet" />
         <StatCard title="Coste/km" value={`${formatNumber(combined.avgCostPerKm, 3)} €`} icon={TrendingUp} color="slate" />
-        <StatCard title="Total eléctrico" value={formatCurrency(elStats.totalCost)} subtitle={`${formatNumber(elStats.totalKWh)} kWh`} icon={Zap} color="blue" />
+        {!isGasOnly && <StatCard title="Total eléctrico" value={formatCurrency(elStats.totalCost)} subtitle={`${formatNumber(elStats.totalKWh)} kWh`} icon={Zap} color="blue" />}
         <StatCard title="Total gasolina" value={formatCurrency(fuStats.totalCost)} subtitle={`${formatNumber(fuStats.totalLiters)} L`} icon={Fuel} color="orange" />
         <StatCard title="CO₂ ahorrado" value={`${formatNumber(combined.estimatedCO2SavedKg, 0)} kg`} subtitle="vs solo gasolina" icon={Leaf} color="emerald" />
       </div>
@@ -433,11 +436,13 @@ export default function Dashboard() {
       {/* Empty state */}
       {!hasData && (
         <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-8 text-center">
-          <p className="text-jaecoo-muted text-sm mb-4">Aún no tienes datos. Añade tu primera recarga o repostaje.</p>
+          <p className="text-jaecoo-muted text-sm mb-4">Aún no tienes datos. Añade tu primer{isGasOnly ? '' : 'a recarga o'} repostaje.</p>
           <div className="flex gap-3 justify-center flex-wrap">
-            <Link to="/recargas" className="inline-flex items-center gap-2 px-4 py-2 bg-jaecoo-electric text-jaecoo-base rounded-xl text-sm font-bold hover:brightness-110 transition-all">
-              <Zap size={14} /> Nueva recarga
-            </Link>
+            {!isGasOnly && (
+              <Link to="/recargas" className="inline-flex items-center gap-2 px-4 py-2 bg-jaecoo-electric text-jaecoo-base rounded-xl text-sm font-bold hover:brightness-110 transition-all">
+                <Zap size={14} /> Nueva recarga
+              </Link>
+            )}
             <Link to="/repostajes" className="inline-flex items-center gap-2 px-4 py-2 bg-jaecoo-fuel text-white rounded-xl text-sm font-bold hover:brightness-110 transition-all">
               <Fuel size={14} /> Nuevo repostaje
             </Link>
@@ -464,12 +469,14 @@ export default function Dashboard() {
             ) : (
               <p className="text-xs text-jaecoo-muted text-center py-12">Sin datos</p>
             )}
-            <div className="mt-3 grid grid-cols-2 gap-3 text-center">
-              <div className="bg-jaecoo-electric-dim rounded-xl p-2 border border-jaecoo-electric/10">
-                <p className="text-xs text-jaecoo-muted">Eléctrico</p>
-                <p className="text-sm font-bold text-jaecoo-electric">{formatNumber(combined.electricKmPercent, 1)}%</p>
-                <p className="text-xs text-jaecoo-muted">{formatNumber(elStats.totalKm, 0)} km</p>
-              </div>
+            <div className={`mt-3 grid gap-3 text-center ${isGasOnly ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {!isGasOnly && (
+                <div className="bg-jaecoo-electric-dim rounded-xl p-2 border border-jaecoo-electric/10">
+                  <p className="text-xs text-jaecoo-muted">Eléctrico</p>
+                  <p className="text-sm font-bold text-jaecoo-electric">{formatNumber(combined.electricKmPercent, 1)}%</p>
+                  <p className="text-xs text-jaecoo-muted">{formatNumber(elStats.totalKm, 0)} km</p>
+                </div>
+              )}
               <div className="bg-jaecoo-fuel-dim rounded-xl p-2 border border-jaecoo-fuel/10">
                 <p className="text-xs text-jaecoo-muted">Gasolina</p>
                 <p className="text-sm font-bold text-jaecoo-fuel">{formatNumber(combined.fuelKmPercent, 1)}%</p>
@@ -478,8 +485,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Recent charges */}
-          <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
+          {/* Recent charges — PHEV only */}
+          {!isGasOnly && <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-jaecoo-primary">Últimas recargas</h2>
               <Link to="/recargas" className="text-xs text-jaecoo-electric hover:text-jaecoo-electric/80 flex items-center gap-0.5 transition-colors">Ver todas <ChevronRight size={12} /></Link>
@@ -502,7 +509,7 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Recent refuels */}
           <div className="bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">
