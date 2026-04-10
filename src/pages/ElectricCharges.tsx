@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
-import { Plus, Zap, Pencil, Trash2, MapPin, Calendar, Battery, Filter, X as XIcon } from 'lucide-react'
+import { Plus, Zap, Pencil, Trash2, MapPin, Calendar, Battery, Filter, X as XIcon, ChevronDown } from 'lucide-react'
 import { drivingModeLabel, drivingModeIcon } from '../components/DrivingModeSelector'
 import { useData } from '../context/DataContext'
 import type { ElectricCharge, FuelRefuel } from '../types'
@@ -24,6 +24,7 @@ export default function ElectricCharges() {
   const [filterMode, setFilterMode] = useState<'all' | 'city' | 'highway' | 'mixed'>('all')
   const [filterFrom, setFilterFrom] = useState('')
   const [filterTo, setFilterTo] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const charges = useMemo(() => {
     return [...data.electricCharges]
@@ -115,33 +116,48 @@ export default function ElectricCharges() {
 
       {/* Filters */}
       {data.electricCharges.length > 0 && (
-        <div className="bg-jaecoo-elevated border border-jaecoo-border rounded-xl p-3 flex flex-wrap gap-3 items-center">
-          <div className="flex items-center gap-1.5 text-xs text-jaecoo-muted font-medium">
-            <Filter size={13} /> Filtros
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {(['all', 'city', 'highway', 'mixed'] as const).map(m => (
-              <button
-                key={m}
-                onClick={() => setFilterMode(m)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors
-                  ${filterMode === m
-                    ? 'bg-jaecoo-electric text-jaecoo-base'
-                    : 'bg-jaecoo-card text-jaecoo-secondary hover:bg-jaecoo-border-strong'}`}
-              >
-                {m === 'all' ? 'Todos' : m === 'city' ? '🏙️ Ciudad' : m === 'highway' ? '🛣️ Carretera' : '🔄 Mixto'}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2 items-center ml-auto">
-            <input type="date" value={filterFrom} onChange={e => setFilterFrom(e.target.value)} className="text-xs border border-jaecoo-border bg-jaecoo-card text-jaecoo-secondary rounded-lg px-2 py-1 outline-none focus:border-jaecoo-electric" />
-            <span className="text-xs text-jaecoo-muted">—</span>
-            <input type="date" value={filterTo} onChange={e => setFilterTo(e.target.value)} className="text-xs border border-jaecoo-border bg-jaecoo-card text-jaecoo-secondary rounded-lg px-2 py-1 outline-none focus:border-jaecoo-electric" />
-            {hasActiveFilter && (
-              <button onClick={clearFilters} aria-label="Limpiar filtros" className="text-xs text-jaecoo-danger hover:text-jaecoo-danger/80 font-medium flex items-center gap-0.5 px-1 transition-colors">
-                <XIcon size={12} /> Limpiar
-              </button>
-            )}
+        <div className="bg-jaecoo-elevated border border-jaecoo-border rounded-xl overflow-hidden">
+          {/* Mobile toggle header */}
+          <button
+            className="sm:hidden w-full flex items-center justify-between px-3 py-2.5 text-xs text-jaecoo-muted font-medium"
+            onClick={() => setFiltersOpen(o => !o)}
+          >
+            <span className="flex items-center gap-1.5">
+              <Filter size={13} />
+              Filtros{hasActiveFilter ? <span className="ml-1 text-jaecoo-electric font-bold">({[filterMode !== 'all', filterFrom !== '', filterTo !== ''].filter(Boolean).length} activos)</span> : ''}
+            </span>
+            <ChevronDown size={14} className={`transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Filter panel — always visible on sm+, toggleable on mobile */}
+          <div className={`flex flex-col sm:flex-row sm:flex-wrap gap-3 items-start sm:items-center p-3 ${filtersOpen ? '' : 'hidden sm:flex'}`}>
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-jaecoo-muted font-medium">
+              <Filter size={13} /> Filtros
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {(['all', 'city', 'highway', 'mixed'] as const).map(m => (
+                <button
+                  key={m}
+                  onClick={() => setFilterMode(m)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors
+                    ${filterMode === m
+                      ? 'bg-jaecoo-electric text-jaecoo-base'
+                      : 'bg-jaecoo-card text-jaecoo-secondary hover:bg-jaecoo-border-strong'}`}
+                >
+                  {m === 'all' ? 'Todos' : m === 'city' ? '🏙️ Ciudad' : m === 'highway' ? '🛣️ Carretera' : '🔄 Mixto'}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2 items-center sm:ml-auto w-full sm:w-auto">
+              <input type="date" value={filterFrom} onChange={e => setFilterFrom(e.target.value)} className="flex-1 sm:flex-none text-xs border border-jaecoo-border bg-jaecoo-card text-jaecoo-secondary rounded-lg px-2 py-1.5 outline-none focus:border-jaecoo-electric" />
+              <span className="text-xs text-jaecoo-muted">—</span>
+              <input type="date" value={filterTo} onChange={e => setFilterTo(e.target.value)} className="flex-1 sm:flex-none text-xs border border-jaecoo-border bg-jaecoo-card text-jaecoo-secondary rounded-lg px-2 py-1.5 outline-none focus:border-jaecoo-electric" />
+              {hasActiveFilter && (
+                <button onClick={clearFilters} aria-label="Limpiar filtros" className="text-xs text-jaecoo-danger hover:text-jaecoo-danger/80 font-medium flex items-center gap-0.5 px-1 transition-colors">
+                  <XIcon size={12} /> Limpiar
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -203,14 +219,14 @@ export default function ElectricCharges() {
                         <button
                           onClick={() => setEditing(c)}
                           aria-label="Editar recarga"
-                          className="w-9 h-9 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim transition-colors"
+                          className="w-11 h-11 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim transition-colors"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => setDeleting(c.id)}
                           aria-label="Eliminar recarga"
-                          className="w-9 h-9 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-danger hover:bg-jaecoo-danger/10 transition-colors"
+                          className="w-11 h-11 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-danger hover:bg-jaecoo-danger/10 transition-colors"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -296,7 +312,7 @@ export default function ElectricCharges() {
 function Chip({ icon, label, electric, green }: { icon?: React.ReactNode; label: string; electric?: boolean; green?: boolean }) {
   return (
     <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full
-      ${electric ? 'bg-jaecoo-electric-dim text-jaecoo-electric' : green ? 'bg-emerald-500/10 text-emerald-400' : 'bg-jaecoo-elevated text-jaecoo-secondary'}`}>
+      ${electric ? 'bg-jaecoo-electric-dim text-jaecoo-electric' : green ? 'bg-jaecoo-success-dim text-jaecoo-success' : 'bg-jaecoo-elevated text-jaecoo-secondary'}`}>
       {icon}{label}
     </span>
   )

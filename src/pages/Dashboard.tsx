@@ -24,23 +24,23 @@ import { apiGetInsurance, apiGetRepairs, apiGetMaintenance, apiGetAccidents } fr
 const INSURANCE_TYPES: Record<string, { label: string; color: string; icon: typeof Shield }> = {
   third_party:          { label: 'Terceros',                    color: 'text-jaecoo-muted bg-jaecoo-elevated',          icon: Shield      },
   third_party_plus:     { label: 'Terceros ampliado',           color: 'text-jaecoo-electric bg-jaecoo-electric-dim',   icon: ShieldCheck },
-  comprehensive_excess: { label: 'Todo riesgo c/ franquicia',   color: 'text-yellow-400 bg-yellow-400/10',              icon: ShieldAlert },
-  comprehensive:        { label: 'Todo riesgo',                 color: 'text-emerald-400 bg-emerald-500/10',            icon: ShieldCheck },
+  comprehensive_excess: { label: 'Todo riesgo c/ franquicia',   color: 'text-jaecoo-warning bg-jaecoo-warning-dim',     icon: ShieldAlert },
+  comprehensive:        { label: 'Todo riesgo',                 color: 'text-jaecoo-success bg-jaecoo-success-dim',     icon: ShieldCheck },
 }
 
 function insExpiryBadge(dateStr?: string) {
   if (!dateStr) return null
   const days = Math.round((new Date(dateStr).getTime() - Date.now()) / 86400000)
-  if (days < 0)   return { label: `Vencido hace ${Math.abs(days)} días`, color: 'text-rose-400 bg-rose-500/10' }
+  if (days < 0)   return { label: `Vencido hace ${Math.abs(days)} días`, color: 'text-jaecoo-danger bg-jaecoo-danger/10' }
   if (days <= 30) return { label: `Vence en ${days} días`,              color: 'text-jaecoo-fuel bg-jaecoo-fuel-dim' }
-  if (days <= 90) return { label: `Vence en ${days} días`,              color: 'text-yellow-400 bg-yellow-400/10' }
-  return            { label: `Vigente — ${days} días`,                  color: 'text-emerald-400 bg-emerald-500/10' }
+  if (days <= 90) return { label: `Vence en ${days} días`,              color: 'text-jaecoo-warning bg-jaecoo-warning-dim' }
+  return            { label: `Vigente — ${days} días`,                  color: 'text-jaecoo-success bg-jaecoo-success-dim' }
 }
 
 const TOOLTIP_STYLE = {
-  contentStyle: { background: '#141c2e', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '12px', color: '#e2e8f0', fontSize: 12 },
-  itemStyle: { color: '#94a3b8' },
-  cursor: { fill: 'rgba(255,255,255,0.04)' },
+  contentStyle: { background: 'var(--j-card)', border: '1px solid var(--j-border-strong)', borderRadius: '12px', color: 'var(--j-text-primary)', fontSize: 12 },
+  itemStyle: { color: 'var(--j-text-secondary)' },
+  cursor: { fill: 'rgba(128,128,128,0.06)' },
 }
 
 export default function Dashboard() {
@@ -145,14 +145,21 @@ export default function Dashboard() {
   // Semáforo de Ahorro
   const hasBothData = elStats.totalKm > 0 && fuStats.totalKm > 0 && elStats.avgCostPerKm > 0 && fuStats.avgCostPerKm > 0
   const savingsRatio = hasBothData ? 1 - (elStats.avgCostPerKm / fuStats.avgCostPerKm) : null
+  const SEMAFORO_STYLES = {
+    success: { dot: 'bg-jaecoo-success', border: 'border-jaecoo-success/20', badge: 'bg-jaecoo-success-dim text-jaecoo-success', text: 'text-jaecoo-success' },
+    warning: { dot: 'bg-jaecoo-warning', border: 'border-jaecoo-warning/20', badge: 'bg-jaecoo-warning-dim text-jaecoo-warning', text: 'text-jaecoo-warning' },
+    fuel:    { dot: 'bg-jaecoo-fuel',    border: 'border-jaecoo-fuel/20',    badge: 'bg-jaecoo-fuel-dim text-jaecoo-fuel',        text: 'text-jaecoo-fuel' },
+    danger:  { dot: 'bg-jaecoo-danger',  border: 'border-jaecoo-danger/20',  badge: 'bg-jaecoo-danger/10 text-jaecoo-danger',     text: 'text-jaecoo-danger' },
+  } as const
+
   const semaforo = savingsRatio === null ? null
     : savingsRatio >= 0.5
-      ? { color: 'emerald', dot: 'bg-emerald-400', msg: `Ahorro excelente — el eléctrico te sale un ${Math.round(savingsRatio * 100)}% más barato que la gasolina`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: '¡Muy eficiente!' }
+      ? { key: 'success' as const, msg: `Ahorro excelente — el eléctrico te sale un ${Math.round(savingsRatio * 100)}% más barato que la gasolina`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: '¡Muy eficiente!' }
       : savingsRatio >= 0.2
-        ? { color: 'yellow', dot: 'bg-yellow-400', msg: `Buen ahorro — el eléctrico es un ${Math.round(savingsRatio * 100)}% más barato`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Buen ritmo' }
+        ? { key: 'warning' as const, msg: `Buen ahorro — el eléctrico es un ${Math.round(savingsRatio * 100)}% más barato`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Buen ritmo' }
         : savingsRatio > 0
-          ? { color: 'orange', dot: 'bg-orange-400', msg: `Ahorro moderado — recarga más para maximizar`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Mejorable' }
-          : { color: 'rose', dot: 'bg-rose-400', msg: `La gasolina sale más barata por km — revisa tarifas de carga`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Ojo' }
+          ? { key: 'fuel' as const, msg: `Ahorro moderado — recarga más para maximizar`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Mejorable' }
+          : { key: 'danger' as const, msg: `La gasolina sale más barata por km — revisa tarifas de carga`, detail: `${formatNumber(elStats.avgCostPerKm, 4)} vs ${formatNumber(fuStats.avgCostPerKm, 4)} €/km`, badge: 'Ojo' }
 
   const pieData = [
     { name: 'Eléctrico', value: combined.totalElectricCost, color: '#22d3ee' },
@@ -213,7 +220,7 @@ export default function Dashboard() {
           </Link>
 
           {/* Savings */}
-          <Link to="/estadisticas" className="bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-[0_0_24px_rgba(16,185,129,0.2)] rounded-2xl p-4 transition-all group">
+          <Link to="/estadisticas" className="bg-jaecoo-success-dim border border-jaecoo-success/20 hover:border-jaecoo-success/40 hover:shadow-[0_0_24px_rgba(16,185,129,0.2)] rounded-2xl p-4 transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <PiggyBank size={16} className="text-jaecoo-success" />
               <p className="text-xs text-jaecoo-success font-bold uppercase tracking-wide">Ahorro eléctrico</p>
@@ -233,34 +240,33 @@ export default function Dashboard() {
       )}
 
       {/* ── Semáforo de Ahorro ── */}
-      {semaforo && (
-        <div className={`bg-jaecoo-card border rounded-2xl p-4 flex items-center gap-4
-          ${semaforo.color === 'emerald' ? 'border-emerald-500/20' : semaforo.color === 'yellow' ? 'border-yellow-400/20' : semaforo.color === 'orange' ? 'border-orange-400/20' : 'border-rose-400/20'}`}>
-          {/* Traffic light dot */}
-          <div className="shrink-0 flex flex-col items-center gap-1.5">
-            {['emerald', 'yellow', 'orange', 'rose'].map(c => (
-              <div key={c} className={`w-3 h-3 rounded-full transition-all ${semaforo.color === c ? semaforo.dot + ' shadow-lg' : 'bg-jaecoo-elevated'}`} />
-            ))}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-sm font-semibold text-jaecoo-primary">Semáforo de Ahorro</p>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full
-                ${semaforo.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400' : semaforo.color === 'yellow' ? 'bg-yellow-400/20 text-yellow-400' : semaforo.color === 'orange' ? 'bg-orange-400/20 text-orange-400' : 'bg-rose-400/20 text-rose-400'}`}>
-                {semaforo.badge}
-              </span>
+      {semaforo && (() => {
+        const s = SEMAFORO_STYLES[semaforo.key]
+        return (
+          <div className={`bg-jaecoo-card border ${s.border} rounded-2xl p-4 flex items-center gap-4`}>
+            {/* Traffic light dots */}
+            <div className="shrink-0 flex flex-col items-center gap-1.5">
+              {(['success', 'warning', 'fuel', 'danger'] as const).map(k => (
+                <div key={k} className={`w-3 h-3 rounded-full transition-all ${semaforo.key === k ? SEMAFORO_STYLES[k].dot + ' shadow-lg' : 'bg-jaecoo-elevated'}`} />
+              ))}
             </div>
-            <p className="text-xs text-jaecoo-secondary">{semaforo.msg}</p>
-            <p className="text-[11px] text-jaecoo-muted mt-0.5">{semaforo.detail}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-sm font-semibold text-jaecoo-primary">Semáforo de Ahorro</p>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${s.badge}`}>
+                  {semaforo.badge}
+                </span>
+              </div>
+              <p className="text-xs text-jaecoo-secondary">{semaforo.msg}</p>
+              <p className="text-[11px] text-jaecoo-muted mt-0.5">{semaforo.detail}</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className={`text-2xl font-bold ${s.text}`}>{formatCurrency(savedVsAllFuel)}</p>
+              <p className="text-[10px] text-jaecoo-muted">ahorrado</p>
+            </div>
           </div>
-          <div className="shrink-0 text-right">
-            <p className={`text-2xl font-bold ${semaforo.color === 'emerald' ? 'text-emerald-400' : semaforo.color === 'yellow' ? 'text-yellow-400' : semaforo.color === 'orange' ? 'text-orange-400' : 'text-rose-400'}`}>
-              {formatCurrency(savedVsAllFuel)}
-            </p>
-            <p className="text-[10px] text-jaecoo-muted">ahorrado</p>
-          </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── Seguro / Averías / Mantenimientos / Partes ── */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -268,11 +274,11 @@ export default function Dashboard() {
         {/* Seguro */}
         {(() => {
           if (!insurance) return (
-            <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
+            <Link to="/seguro" className="block bg-jaecoo-success-dim border border-jaecoo-success/20 hover:border-jaecoo-success/40 rounded-2xl p-4 transition-all group">
               <div className="flex items-center gap-2 mb-1">
-                <Shield size={15} className="text-emerald-400" />
-                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro</p>
-                <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Shield size={15} className="text-jaecoo-success" />
+                <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-success">Seguro</p>
+                <ChevronRight size={13} className="text-jaecoo-success ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <p className="text-sm text-jaecoo-muted">Sin seguro registrado</p>
             </Link>
@@ -281,11 +287,11 @@ export default function Dashboard() {
           const TypeIcon = typeInfo.icon
           const expiry = insExpiryBadge(insurance.endDate)
           return (
-            <Link to="/seguro" className="block bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-500/40 rounded-2xl p-4 transition-all group">
+            <Link to="/seguro" className="block bg-jaecoo-success-dim border border-jaecoo-success/20 hover:border-jaecoo-success/40 rounded-2xl p-4 transition-all group">
               <div className="flex items-center gap-2 mb-2">
-                <TypeIcon size={15} className="text-emerald-400" />
-                <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">Seguro</p>
-                <ChevronRight size={13} className="text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                <TypeIcon size={15} className="text-jaecoo-success" />
+                <p className="text-xs font-bold uppercase tracking-wide text-jaecoo-success">Seguro</p>
+                <ChevronRight size={13} className="text-jaecoo-success ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <p className="text-base font-bold text-jaecoo-primary truncate">{insurance.company}</p>
               <div className="flex flex-wrap gap-1 mt-1 mb-2">
@@ -306,19 +312,19 @@ export default function Dashboard() {
           const openRepairs = (repairs ?? []).filter(r => r.status === 'open' || r.status === 'in_repair')
           const last = [...(repairs ?? [])].sort((a, b) => b.date.localeCompare(a.date))[0]
           const STATUS: Record<string, { label: string; color: string }> = {
-            open:      { label: 'Abierta',      color: 'text-rose-400 bg-rose-500/10' },
+            open:      { label: 'Abierta',      color: 'text-jaecoo-danger bg-jaecoo-danger/10' },
             in_repair: { label: 'En taller',    color: 'text-jaecoo-fuel bg-jaecoo-fuel-dim' },
-            resolved:  { label: 'Resuelta',     color: 'text-emerald-400 bg-emerald-500/10' },
+            resolved:  { label: 'Resuelta',     color: 'text-jaecoo-success bg-jaecoo-success-dim' },
             warranty:  { label: 'En garantía',  color: 'text-jaecoo-electric bg-jaecoo-electric-dim' },
           }
           const hasOpen = openRepairs.length > 0
           return (
-            <Link to="/taller?tab=repairs" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=repairs" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20 hover:border-jaecoo-danger/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
-                <Wrench size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
-                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Averías</p>
-                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-rose-400 bg-rose-500/10 ml-1">{openRepairs.length} abierta{openRepairs.length > 1 ? 's' : ''}</span>}
-                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'}`} />
+                <Wrench size={15} className={hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-secondary'}`}>Averías</p>
+                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-jaecoo-danger bg-jaecoo-danger/10 ml-1">{openRepairs.length} abierta{openRepairs.length > 1 ? 's' : ''}</span>}
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-muted'}`} />
               </div>
               {!last ? (
                 <p className="text-sm text-jaecoo-muted">Sin averías registradas</p>
@@ -350,11 +356,11 @@ export default function Dashboard() {
             : null
           const alert = daysToNext !== null && daysToNext <= 30
           return (
-            <Link to="/taller?tab=maintenance" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-yellow-400/10 border-yellow-400/20 hover:border-yellow-400/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=maintenance" className={`block border rounded-2xl p-4 transition-all group ${alert ? 'bg-jaecoo-warning-dim border-jaecoo-warning/20 hover:border-jaecoo-warning/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
-                <ClipboardList size={15} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
-                <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>Revisiones</p>
-                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${alert ? 'text-yellow-400' : 'text-jaecoo-muted'}`} />
+                <ClipboardList size={15} className={alert ? 'text-jaecoo-warning' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${alert ? 'text-jaecoo-warning' : 'text-jaecoo-secondary'}`}>Revisiones</p>
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${alert ? 'text-jaecoo-warning' : 'text-jaecoo-muted'}`} />
               </div>
               {!last ? (
                 <p className="text-sm text-jaecoo-muted">Sin mantenimientos registrados</p>
@@ -364,8 +370,8 @@ export default function Dashboard() {
                   <p className="text-[11px] text-jaecoo-muted mt-0.5">Último: {last.date}</p>
                   {nextService?.nextDate && (
                     <div className="flex items-center gap-1.5 mt-1.5">
-                      <CalendarDays size={11} className={alert ? 'text-yellow-400' : 'text-jaecoo-muted'} />
-                      <span className={`text-[11px] font-semibold ${alert ? 'text-yellow-400' : 'text-jaecoo-secondary'}`}>
+                      <CalendarDays size={11} className={alert ? 'text-jaecoo-warning' : 'text-jaecoo-muted'} />
+                      <span className={`text-[11px] font-semibold ${alert ? 'text-jaecoo-warning' : 'text-jaecoo-secondary'}`}>
                         Próximo: {nextService.nextDate}{daysToNext !== null ? ` (${daysToNext < 0 ? 'hace ' + Math.abs(daysToNext) + ' días' : 'en ' + daysToNext + ' días'})` : ''}
                       </span>
                     </div>
@@ -384,17 +390,17 @@ export default function Dashboard() {
           const last = [...list].sort((a, b) => b.date.localeCompare(a.date))[0]
           const hasOpen = open.length > 0
           const STATUS: Record<string, { label: string; color: string }> = {
-            open:        { label: 'Abierto',    color: 'text-rose-400 bg-rose-500/10' },
-            in_progress: { label: 'En gestión', color: 'text-yellow-400 bg-yellow-400/10' },
-            resolved:    { label: 'Resuelto',   color: 'text-emerald-400 bg-emerald-500/10' },
+            open:        { label: 'Abierto',    color: 'text-jaecoo-danger bg-jaecoo-danger/10' },
+            in_progress: { label: 'En gestión', color: 'text-jaecoo-warning bg-jaecoo-warning-dim' },
+            resolved:    { label: 'Resuelto',   color: 'text-jaecoo-success bg-jaecoo-success-dim' },
           }
           return (
-            <Link to="/taller?tab=accidents" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-rose-500/10 border-rose-500/20 hover:border-rose-500/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
+            <Link to="/taller?tab=accidents" className={`block border rounded-2xl p-4 transition-all group ${hasOpen ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20 hover:border-jaecoo-danger/40' : 'bg-jaecoo-card border-jaecoo-border hover:border-jaecoo-border-strong'}`}>
               <div className="flex items-center gap-2 mb-2">
-                <AlertOctagon size={15} className={hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'} />
-                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-rose-400' : 'text-jaecoo-secondary'}`}>Partes</p>
-                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-rose-400 bg-rose-500/10 ml-1">{open.length} abierto{open.length > 1 ? 's' : ''}</span>}
-                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-rose-400' : 'text-jaecoo-muted'}`} />
+                <AlertOctagon size={15} className={hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-muted'} />
+                <p className={`text-xs font-bold uppercase tracking-wide ${hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-secondary'}`}>Partes</p>
+                {hasOpen && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-jaecoo-danger bg-jaecoo-danger/10 ml-1">{open.length} abierto{open.length > 1 ? 's' : ''}</span>}
+                <ChevronRight size={13} className={`ml-auto opacity-0 group-hover:opacity-100 transition-opacity ${hasOpen ? 'text-jaecoo-danger' : 'text-jaecoo-muted'}`} />
               </div>
               {!last ? (
                 <p className="text-sm text-jaecoo-muted">Sin partes registrados</p>

@@ -27,8 +27,11 @@ export default function DrivingModeSelector({ value, onChange, error, context, a
 
   return (
     <div>
-      <p className="text-xs font-semibold text-jaecoo-muted mb-2">{label}</p>
-      <div className="grid grid-cols-3 gap-2">
+      <p className="text-xs font-semibold text-jaecoo-muted mb-2">
+        {label}
+        <span className="ml-1.5 text-jaecoo-danger font-bold" aria-hidden>*</span>
+      </p>
+      <div className={`grid grid-cols-3 gap-2 rounded-xl transition-all ${error ? 'p-1.5 -m-1.5 ring-1 ring-jaecoo-danger/40' : ''}`}>
         {MODES.map(m => (
           <button
             key={m.value}

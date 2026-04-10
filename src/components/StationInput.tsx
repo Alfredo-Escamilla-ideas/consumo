@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, ChevronDown } from 'lucide-react'
 import type { KnownStation } from '../utils/calculations'
 
@@ -19,12 +20,41 @@ export default function StationInput({
 }: StationInputProps) {
   const [open, setOpen] = useState(false)
   const [filtered, setFiltered] = useState<KnownStation[]>([])
-  const ref = useRef<HTMLDivElement>(null)
+  const [dropStyle, setDropStyle] = useState<React.CSSProperties>({})
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const focus = accentColor === 'blue' ? 'focus:border-jaecoo-electric' : 'focus:border-jaecoo-fuel'
 
+  // Recalculate dropdown position whenever it opens or window scrolls/resizes
+  const updateDropStyle = () => {
+    if (wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect()
+      setDropStyle({
+        position: 'fixed',
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 9999,
+      })
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return
+    updateDropStyle()
+    window.addEventListener('scroll', updateDropStyle, true)
+    window.addEventListener('resize', updateDropStyle)
+    return () => {
+      window.removeEventListener('scroll', updateDropStyle, true)
+      window.removeEventListener('resize', updateDropStyle)
+    }
+  }, [open])
+
+  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -35,7 +65,12 @@ export default function StationInput({
     const q = v.toLowerCase()
     const matches = known.filter(s => s.name.toLowerCase().includes(q))
     setFiltered(matches)
-    setOpen(matches.length > 0 && v.length > 0)
+    if (matches.length > 0 && v.length > 0) {
+      updateDropStyle()
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
   }
 
   const select = (s: KnownStation) => {
@@ -56,7 +91,7 @@ export default function StationInput({
       {/* Station name with autocomplete */}
       <div className="flex flex-col gap-1">
         <label className="text-xs font-medium text-jaecoo-muted">Nombre de la estación</label>
-        <div ref={ref} className="relative">
+        <div ref={wrapperRef} className="relative">
           <input
             type="text"
             placeholder="e.g. Zunder Madrid"
@@ -65,7 +100,10 @@ export default function StationInput({
             onFocus={() => {
               const matches = known.filter(s => s.name.toLowerCase().includes(nameValue.toLowerCase()))
               setFiltered(matches)
-              if (matches.length > 0) setOpen(true)
+              if (matches.length > 0) {
+                updateDropStyle()
+                setOpen(true)
+              }
             }}
             className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors pr-8 text-jaecoo-primary ${borderName} ${focus} placeholder:text-jaecoo-muted`}
           />
@@ -73,21 +111,28 @@ export default function StationInput({
             <button
               type="button"
               tabIndex={-1}
-              onClick={() => { setFiltered(known); setOpen(v => !v) }}
+              onClick={() => {
+                setFiltered(known)
+                if (!open) updateDropStyle()
+                setOpen(v => !v)
+              }}
               className="absolute right-2.5 top-2.5 text-jaecoo-muted hover:text-jaecoo-secondary"
             >
-              <ChevronDown size={14} />
+              <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
             </button>
           )}
 
-          {/* Dropdown */}
-          {open && filtered.length > 0 && (
-            <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-jaecoo-card rounded-xl border border-jaecoo-border-strong shadow-j-elevated overflow-hidden max-h-48 overflow-y-auto">
+          {/* Dropdown — rendered via portal to escape modal overflow clipping */}
+          {open && filtered.length > 0 && createPortal(
+            <div
+              style={dropStyle}
+              className="bg-jaecoo-card rounded-xl border border-jaecoo-border-strong shadow-j-elevated overflow-hidden max-h-52 overflow-y-auto"
+            >
               {filtered.map((s, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => select(s)}
+                  onMouseDown={e => { e.preventDefault(); select(s) }}
                   className="w-full text-left px-3 py-2.5 hover:bg-jaecoo-elevated transition-colors border-b border-jaecoo-border last:border-0"
                 >
                   <p className="text-sm font-medium text-jaecoo-primary">{s.name}</p>
@@ -96,7 +141,8 @@ export default function StationInput({
                   </p>
                 </button>
               ))}
-            </div>
+            </div>,
+            document.body
           )}
         </div>
         {nameError && <p className="text-xs text-jaecoo-danger">{nameError}</p>}

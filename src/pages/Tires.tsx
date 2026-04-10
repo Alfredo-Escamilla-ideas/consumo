@@ -17,7 +17,7 @@ const POSITIONS: { value: TirePosition; label: string; short: string }[] = [
 const TYPES: { value: TireType; label: string; color: string }[] = [
   { value: 'summer',   label: 'Verano',     color: 'text-jaecoo-fuel bg-jaecoo-fuel-dim' },
   { value: 'winter',   label: 'Invierno',   color: 'text-jaecoo-electric bg-jaecoo-electric-dim' },
-  { value: 'allseason',label: 'All-Season', color: 'text-emerald-400 bg-emerald-500/10' },
+  { value: 'allseason',label: 'All-Season', color: 'text-jaecoo-success bg-jaecoo-success-dim' },
 ]
 
 const TIRE_BRANDS = [
@@ -63,10 +63,10 @@ function wearInfo(tire: Tire, currentOdo: number) {
   const driven = Math.max(0, currentOdo - tire.odometerAtInstall)
   const pct = Math.min(100, Math.round((driven / tire.estimatedLifeKm) * 100))
   const remaining = Math.max(0, tire.estimatedLifeKm - driven)
-  if (pct >= 90) return { pct, driven, remaining, color: 'text-rose-400', bar: 'bg-rose-500',    label: 'Sustituir',    icon: CircleAlert }
-  if (pct >= 75) return { pct, driven, remaining, color: 'text-jaecoo-fuel', bar: 'bg-jaecoo-fuel', label: 'Pronto',  icon: AlertTriangle }
-  if (pct >= 50) return { pct, driven, remaining, color: 'text-yellow-400', bar: 'bg-yellow-400',  label: 'Mitad',       icon: AlertTriangle }
-  return              { pct, driven, remaining, color: 'text-emerald-400',  bar: 'bg-emerald-500', label: 'Buen estado', icon: CheckCircle2 }
+  if (pct >= 90) return { pct, driven, remaining, color: 'text-jaecoo-danger',  bar: 'bg-jaecoo-danger',  label: 'Sustituir',   icon: CircleAlert }
+  if (pct >= 75) return { pct, driven, remaining, color: 'text-jaecoo-fuel',   bar: 'bg-jaecoo-fuel',   label: 'Pronto',      icon: AlertTriangle }
+  if (pct >= 50) return { pct, driven, remaining, color: 'text-jaecoo-warning', bar: 'bg-jaecoo-warning', label: 'Mitad',       icon: AlertTriangle }
+  return              { pct, driven, remaining, color: 'text-jaecoo-success',  bar: 'bg-jaecoo-success', label: 'Buen estado', icon: CheckCircle2 }
 }
 
 function daysUntil(dateStr?: string) {
@@ -117,11 +117,11 @@ function TireCard({
           <p className="text-xs text-jaecoo-secondary truncate">{tire.model}</p>
         </div>
         <div className="flex gap-1 shrink-0">
-          <button onClick={() => onEdit(tire, position.value)} className="p-1.5 rounded-lg text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim transition-colors">
-            <Pencil size={13} />
+          <button onClick={() => onEdit(tire, position.value)} className="w-9 h-9 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-electric hover:bg-jaecoo-electric-dim transition-colors">
+            <Pencil size={14} />
           </button>
-          <button onClick={() => onDelete(tire.id)} className="p-1.5 rounded-lg text-jaecoo-muted hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
-            <Trash2 size={13} />
+          <button onClick={() => onDelete(tire.id)} className="w-9 h-9 flex items-center justify-center rounded-lg text-jaecoo-muted hover:text-jaecoo-danger hover:bg-jaecoo-danger/10 transition-colors">
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -174,7 +174,7 @@ function TireCard({
         {days !== null && (
           <div>
             <p className="text-[9px] text-jaecoo-muted uppercase tracking-wide">Cambio aprox.</p>
-            <p className={`text-[11px] font-semibold ${days < 0 ? 'text-rose-400' : days < 30 ? 'text-jaecoo-fuel' : 'text-jaecoo-secondary'}`}>
+            <p className={`text-[11px] font-semibold ${days < 0 ? 'text-jaecoo-danger' : days < 30 ? 'text-jaecoo-fuel' : 'text-jaecoo-secondary'}`}>
               {days < 0 ? `Hace ${Math.abs(days)} días` : days === 0 ? 'Hoy' : `En ${days} días`}
             </p>
           </div>
@@ -226,95 +226,110 @@ function TireModal({
           <button onClick={onClose} className="p-1.5 rounded-lg text-jaecoo-muted hover:text-jaecoo-primary hover:bg-jaecoo-elevated transition-colors"><X size={16} /></button>
         </div>
 
-        <form onSubmit={submit} className="p-5 space-y-4">
+        <form onSubmit={submit} className="p-5 space-y-5">
           <datalist id="tire-sizes">
             {JAECOO7_SIZES.map(s => <option key={s} value={s} />)}
           </datalist>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Marca *</label>
-              <select required className={inp} value={f.brand} onChange={e => set('brand', e.target.value)}>
-                {TIRE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
+          {/* ─── Sección 1: Identificación ─────────────────────────── */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-jaecoo-muted">Identificación</p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Marca *</label>
+                <select required className={inp} value={f.brand} onChange={e => set('brand', e.target.value)}>
+                  {TIRE_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className={lbl}>Modelo *</label>
+                <input required className={inp} placeholder="Primacy 4" value={f.model} onChange={e => set('model', e.target.value)} />
+              </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Tamaño *</label>
+                <input required list="tire-sizes" className={inp} placeholder="235/50 R19" value={f.size} onChange={e => set('size', e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Posición *</label>
+                <select required className={inp} value={f.position} onChange={e => set('position', e.target.value as TirePosition)}>
+                  {POSITIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                </select>
+              </div>
+            </div>
+
             <div>
-              <label className={lbl}>Modelo *</label>
-              <input required className={inp} placeholder="Primacy 4" value={f.model} onChange={e => set('model', e.target.value)} />
+              <label className={lbl}>Tipo de neumático</label>
+              <div className="flex gap-2">
+                {TYPES.map(t => (
+                  <button key={t.value} type="button"
+                    onClick={() => set('type', t.value)}
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
+                      ${f.type === t.value ? `${t.color} border-current` : 'border-jaecoo-border text-jaecoo-muted hover:border-jaecoo-border-strong'}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Tamaño *</label>
-              <input required list="tire-sizes" className={inp} placeholder="235/50 R19" value={f.size} onChange={e => set('size', e.target.value)} />
+          {/* ─── Sección 2: Compra e instalación ───────────────────── */}
+          <div className="space-y-3 pt-1 border-t border-jaecoo-border">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-jaecoo-muted pt-2">Compra e instalación</p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Fecha de compra *</label>
+                <input required type="date" className={inp} value={f.purchaseDate} onChange={e => set('purchaseDate', e.target.value)} />
+              </div>
+              <div>
+                <label className={lbl}>Precio (€)</label>
+                <input type="number" step="0.01" min="0" className={inp} placeholder="120.00" value={f.purchasePrice ?? ''} onChange={e => set('purchasePrice', e.target.value ? parseFloat(e.target.value) : undefined)} />
+              </div>
             </div>
-            <div>
-              <label className={lbl}>Posición *</label>
-              <select required className={inp} value={f.position} onChange={e => set('position', e.target.value as TirePosition)}>
-                {POSITIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-              </select>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Km al instalar</label>
+                <input type="number" min="0" className={inp} placeholder="0" value={f.odometerAtInstall} onChange={e => set('odometerAtInstall', parseInt(e.target.value) || 0)} />
+              </div>
+              <div>
+                <label className={lbl}>Vida estimada (km)</label>
+                <input type="number" min="1000" className={inp} value={f.estimatedLifeKm} onChange={e => set('estimatedLifeKm', parseInt(e.target.value) || 40000)} />
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className={lbl}>Tipo</label>
-            <div className="flex gap-2">
-              {TYPES.map(t => (
-                <button key={t.value} type="button"
-                  onClick={() => set('type', t.value)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all
-                    ${f.type === t.value ? `${t.color} border-current` : 'border-jaecoo-border text-jaecoo-muted hover:border-jaecoo-border-strong'}`}>
-                  {t.label}
-                </button>
-              ))}
+          {/* ─── Sección 3: Estado y seguimiento ───────────────────── */}
+          <div className="space-y-3 pt-1 border-t border-jaecoo-border">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-jaecoo-muted pt-2">Estado y seguimiento</p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={lbl}>Profundidad dibujo (mm)</label>
+                <input type="number" step="0.1" min="0" max="12" className={inp} placeholder="8.0" value={f.treadDepthMm ?? ''} onChange={e => set('treadDepthMm', e.target.value ? parseFloat(e.target.value) : undefined)} />
+              </div>
+              <div>
+                <label className={lbl}>Código DOT</label>
+                <input className={inp} placeholder="3223" maxLength={8} value={f.dotCode ?? ''} onChange={e => set('dotCode', e.target.value || undefined)} />
+              </div>
+            </div>
+
+            <div>
+              <label className={lbl}>Fecha aproximada de cambio</label>
+              <input type="date" className={inp} value={f.estimatedChangeDate ?? ''} onChange={e => set('estimatedChangeDate', e.target.value || undefined)} />
+            </div>
+
+            <div>
+              <label className={lbl}>Notas</label>
+              <textarea rows={2} className={`${inp} resize-none`} placeholder="Observaciones..." value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Fecha de compra *</label>
-              <input required type="date" className={inp} value={f.purchaseDate} onChange={e => set('purchaseDate', e.target.value)} />
-            </div>
-            <div>
-              <label className={lbl}>Precio (€)</label>
-              <input type="number" step="0.01" min="0" className={inp} placeholder="120.00" value={f.purchasePrice ?? ''} onChange={e => set('purchasePrice', e.target.value ? parseFloat(e.target.value) : undefined)} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Km al instalar</label>
-              <input type="number" min="0" className={inp} placeholder="0" value={f.odometerAtInstall} onChange={e => set('odometerAtInstall', parseInt(e.target.value) || 0)} />
-            </div>
-            <div>
-              <label className={lbl}>Vida estimada (km)</label>
-              <input type="number" min="1000" className={inp} value={f.estimatedLifeKm} onChange={e => set('estimatedLifeKm', parseInt(e.target.value) || 40000)} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={lbl}>Profundidad dibujo (mm)</label>
-              <input type="number" step="0.1" min="0" max="12" className={inp} placeholder="8.0" value={f.treadDepthMm ?? ''} onChange={e => set('treadDepthMm', e.target.value ? parseFloat(e.target.value) : undefined)} />
-            </div>
-            <div>
-              <label className={lbl}>Código DOT</label>
-              <input className={inp} placeholder="3223" maxLength={8} value={f.dotCode ?? ''} onChange={e => set('dotCode', e.target.value || undefined)} />
-            </div>
-          </div>
-
-          <div>
-            <label className={lbl}>Fecha aproximada de cambio</label>
-            <input type="date" className={inp} value={f.estimatedChangeDate ?? ''} onChange={e => set('estimatedChangeDate', e.target.value || undefined)} />
-          </div>
-
-          <div>
-            <label className={lbl}>Notas</label>
-            <textarea rows={2} className={`${inp} resize-none`} placeholder="Observaciones..." value={f.notes ?? ''} onChange={e => set('notes', e.target.value || undefined)} />
-          </div>
-
-          {saveError && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-3 py-2">{saveError}</p>}
+          {saveError && <p className="text-xs text-jaecoo-danger bg-jaecoo-danger/10 border border-jaecoo-danger/20 rounded-xl px-3 py-2">{saveError}</p>}
           <button type="submit" disabled={saving}
             className="w-full py-3 bg-jaecoo-electric text-jaecoo-base font-bold rounded-xl hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
             {saving && <Loader2 size={16} className="animate-spin" />}
@@ -394,7 +409,7 @@ export default function Tires() {
   // Summary stats
   const scored = tires.filter(t => t.position !== 'spare')
   const avgWear = scored.length > 0 ? Math.round(scored.reduce((s, t) => s + wearInfo(t, currentOdo).pct, 0) / scored.length) : null
-  const wearColor = avgWear == null ? '' : avgWear >= 75 ? 'text-rose-400' : avgWear >= 50 ? 'text-yellow-400' : 'text-emerald-400'
+  const wearColor = avgWear == null ? '' : avgWear >= 75 ? 'text-jaecoo-danger' : avgWear >= 50 ? 'text-jaecoo-warning' : 'text-jaecoo-success'
 
   return (
     <div className="space-y-6">

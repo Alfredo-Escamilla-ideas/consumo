@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Car, LogOut, Info, Zap, Fuel, Database, Trash2, AlertTriangle, Download } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { apiDeleteVehicle } from '../services/api'
 import { formatDate } from '../utils/calculations'
+import { ToastContainer } from '../components/Toast'
+import type { ToastData } from '../components/Toast'
 
 function downloadCsv(filename: string, rows: (string | number | null | undefined)[][]): void {
   const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n')
@@ -22,8 +24,19 @@ export default function Settings() {
   const [confirmLogout, setConfirmLogout] = useState(false)
   const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm' | 'deleting'>('idle')
   const [deleteError, setDeleteError] = useState('')
+  const [toasts, setToasts] = useState<ToastData[]>([])
+
+  const toast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
+    const id = crypto.randomUUID()
+    setToasts(prev => [...prev, { id, message, type }])
+  }, [])
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }, [])
 
   const exportChargesCsv = () => {
+    const filename = `recargas_${plate}_${new Date().toISOString().substring(0, 10)}.csv`
     const header = ['Fecha', 'Odómetro (km)', 'kWh', '€/kWh tarifa', 'Coste bruto (€)', 'Coste real (€)', 'Batería %', 'Waylet antes (€)', 'Waylet después (€)', 'Estación', 'Dirección', 'Modo conducción', 'Notas']
     const rows = data.electricCharges.map(c => [
       c.date, c.odometer, c.kWh, c.pricePerKWh,
@@ -31,16 +44,19 @@ export default function Settings() {
       c.batteryPercent ?? '', c.wayletBefore ?? '', c.wayletAfter ?? '',
       c.stationName, c.stationAddress, c.drivingMode ?? '', c.notes ?? '',
     ])
-    downloadCsv(`recargas_${plate}_${new Date().toISOString().substring(0, 10)}.csv`, [header, ...rows])
+    downloadCsv(filename, [header, ...rows])
+    toast(`Descargado: ${filename}`)
   }
 
   const exportRefuelsCsv = () => {
+    const filename = `repostajes_${plate}_${new Date().toISOString().substring(0, 10)}.csv`
     const header = ['Fecha', 'Odómetro (km)', 'Litros', '€/litro', 'Coste total (€)', 'Estación', 'Dirección', 'Modo conducción', 'Notas']
     const rows = data.fuelRefuels.map(r => [
       r.date, r.odometer, r.liters, r.pricePerLiter, r.totalPrice,
       r.stationName, r.stationAddress, r.drivingMode ?? '', r.notes ?? '',
     ])
-    downloadCsv(`repostajes_${plate}_${new Date().toISOString().substring(0, 10)}.csv`, [header, ...rows])
+    downloadCsv(filename, [header, ...rows])
+    toast(`Descargado: ${filename}`)
   }
 
   const handleDeleteVehicle = async () => {
@@ -56,6 +72,7 @@ export default function Settings() {
   }
 
   return (
+    <>
     <div className="max-w-4xl">
       <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-6">
 
@@ -252,6 +269,9 @@ export default function Settings() {
         </div>
       </div>
     </div>
+
+    <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+    </>
   )
 }
 

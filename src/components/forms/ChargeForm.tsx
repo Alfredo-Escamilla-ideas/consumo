@@ -149,10 +149,10 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
 
       {/* Odometer + date */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Fecha" error={errors.date}>
+        <Field label="Fecha" error={errors.date} required>
           <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={inp(errors.date)} />
         </Field>
-        <Field label="Km actuales (odómetro)" error={errors.odometer}>
+        <Field label="Km actuales (odómetro)" error={errors.odometer} required>
           <input type="number" min="0" placeholder="ej. 5420" value={f.odometer} onChange={e => set('odometer', e.target.value)} className={inp(errors.odometer)} />
         </Field>
       </div>
@@ -180,10 +180,10 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
 
       {/* Main charge data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="kWh recargados" error={errors.kWh}>
+        <Field label="kWh recargados" error={errors.kWh} required>
           <input type="number" step="0.01" min="0" placeholder="ej. 18,5" value={f.kWh} onChange={e => set('kWh', e.target.value)} className={inp(errors.kWh)} />
         </Field>
-        <Field label="Precio del kWh — tarifa (€)" error={errors.pricePerKWh}>
+        <Field label="Precio del kWh — tarifa (€)" error={errors.pricePerKWh} required>
           <input type="number" step="any" min="0" max="2" placeholder="ej. 0,48" value={f.pricePerKWh} onChange={e => set('pricePerKWh', e.target.value)} className={inp(errors.pricePerKWh)} />
         </Field>
         <Field label="% batería al terminar la recarga">
@@ -229,8 +229,8 @@ export default function ChargeForm({ initial, onSubmit, onCancel, isSubmitting }
               <WayletRow label="Coste bruto de la recarga" value={formatCurrency(waylet.gross)} sub={`${formatNumber(kWh)} kWh × ${formatNumber(pricePerKWh, 3)} €/kWh`} />
               <WayletRow label="Saldo Waylet utilizado" value={`− ${formatCurrency(waylet.wayletUsed)}`} valueColor="text-jaecoo-fuel" />
               <WayletRow label="Dinero real pagado" value={formatCurrency(waylet.cashPaid)} valueColor="text-jaecoo-primary font-bold" />
-              <WayletRow label="Retorno Waylet (+50%)" value={`+ ${formatCurrency(waylet.wayletReturn)}`} valueColor="text-emerald-400" />
-              <WayletRow label="Nuevo saldo Waylet" value={formatCurrency(waylet.newBalance)} valueColor="text-emerald-400 font-semibold" />
+              <WayletRow label="Retorno Waylet (+50%)" value={`+ ${formatCurrency(waylet.wayletReturn)}`} valueColor="text-jaecoo-success" />
+              <WayletRow label="Nuevo saldo Waylet" value={formatCurrency(waylet.newBalance)} valueColor="text-jaecoo-success font-semibold" />
               <WayletRow label="Precio efectivo por kWh" value={`${formatNumber(waylet.effectivePerKWh, 4)} €/kWh`} valueColor="text-jaecoo-electric font-bold" />
             </div>
           )}
@@ -282,10 +282,13 @@ function WayletRow({ label, value, sub, valueColor = 'text-jaecoo-secondary' }: 
   )
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-jaecoo-muted">{label}</label>
+      <label className="text-xs font-medium text-jaecoo-muted">
+        {label}
+        {required && <span className="ml-1 text-jaecoo-danger font-bold" aria-hidden>*</span>}
+      </label>
       {children}
       {error && <p className="text-xs text-jaecoo-danger">{error}</p>}
     </div>

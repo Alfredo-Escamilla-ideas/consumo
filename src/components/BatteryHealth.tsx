@@ -37,10 +37,10 @@ function GaugeArc({ score, color }: { score: number; color: string }) {
         <path d={arcPath} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
       )}
       {/* Score text */}
-      <text x="60" y="58" textAnchor="middle" fontSize="22" fontWeight="700" fill="var(--j-text-primary)">
+      <text x="60" y="57" textAnchor="middle" fontSize="26" fontWeight="700" fill="var(--j-text-primary)">
         {score}
       </text>
-      <text x="60" y="70" textAnchor="middle" fontSize="9" fill="var(--j-text-muted)">
+      <text x="60" y="70" textAnchor="middle" fontSize="10" fill="var(--j-text-muted)">
         / 100
       </text>
     </svg>
@@ -56,10 +56,10 @@ const COLOR_HEX: Record<string, string> = {
 }
 
 const COLOR_CLASSES: Record<string, { bg: string; text: string; border: string; bar: string }> = {
-  emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30', bar: 'bg-emerald-500' },
+  emerald: { bg: 'bg-jaecoo-success-dim', text: 'text-jaecoo-success', border: 'border-jaecoo-success/30', bar: 'bg-jaecoo-success' },
   blue:    { bg: 'bg-jaecoo-electric-dim', text: 'text-jaecoo-electric', border: 'border-jaecoo-electric/30', bar: 'bg-jaecoo-electric' },
   orange:  { bg: 'bg-jaecoo-fuel-dim', text: 'text-jaecoo-fuel', border: 'border-jaecoo-fuel/30', bar: 'bg-jaecoo-fuel' },
-  rose:    { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30', bar: 'bg-rose-500' },
+  rose:    { bg: 'bg-jaecoo-danger/10', text: 'text-jaecoo-danger', border: 'border-jaecoo-danger/30', bar: 'bg-jaecoo-danger' },
 }
 
 // ── Score bar ────────────────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ function ScoreBar({ record }: { record: ChargeHealthRecord }) {
         <div className="relative h-4 bg-jaecoo-elevated rounded-full overflow-hidden">
           {/* Optimal zone (20%–80%) */}
           <div
-            className="absolute top-0 h-full bg-emerald-500/10 border-x border-emerald-500/20"
+            className="absolute top-0 h-full bg-jaecoo-success-dim border-x border-jaecoo-success/20"
             style={{ left: '20%', width: '60%' }}
           />
           {/* Charge range bar */}
@@ -99,10 +99,10 @@ function ScoreBar({ record }: { record: ChargeHealthRecord }) {
 
         {/* Labels */}
         <div className="flex justify-between mt-1">
-          <span className={`text-[10px] font-semibold ${startOk ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className={`text-[10px] font-semibold ${startOk ? 'text-jaecoo-success' : 'text-jaecoo-danger'}`}>
             Inicio {record.startPct}%{!startOk && ' ⚠'}
           </span>
-          <span className={`text-[10px] font-semibold ${endOk ? 'text-emerald-400' : 'text-rose-400'}`}>
+          <span className={`text-[10px] font-semibold ${endOk ? 'text-jaecoo-success' : 'text-jaecoo-danger'}`}>
             {!endOk && '⚠ '}Fin {record.endPct}%
           </span>
         </div>
@@ -149,10 +149,10 @@ export default function BatteryHealth({ charges }: Props) {
           <div className="w-full bg-jaecoo-elevated rounded-xl p-3 space-y-2">
             <p className="text-[10px] font-semibold text-jaecoo-muted uppercase tracking-widest mb-2">Criterios de puntuación</p>
             {[
-              { range: '80–100', label: 'Óptima', desc: 'Inicio ≥20% · Fin ≤80%', color: 'text-emerald-400' },
-              { range: '60–79',  label: 'Buena',  desc: 'Ligera desviación',       color: 'text-jaecoo-electric' },
+              { range: '80–100', label: 'Óptima',  desc: 'Inicio ≥20% · Fin ≤80%', color: 'text-jaecoo-success' },
+              { range: '60–79',  label: 'Buena',   desc: 'Ligera desviación',       color: 'text-jaecoo-electric' },
               { range: '35–59',  label: 'Regular', desc: 'Fuera del rango ideal',   color: 'text-jaecoo-fuel' },
-              { range: '0–34',   label: 'Baja',   desc: 'Inicio ≤0% o fin 100%',  color: 'text-rose-400' },
+              { range: '0–34',   label: 'Baja',    desc: 'Inicio ≤0% o fin 100%',  color: 'text-jaecoo-danger' },
             ].map(r => (
               <div key={r.range} className="flex items-center gap-2">
                 <span className={`text-[10px] font-bold w-12 shrink-0 ${r.color}`}>{r.range}</span>

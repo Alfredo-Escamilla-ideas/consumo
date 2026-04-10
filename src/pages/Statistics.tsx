@@ -19,6 +19,7 @@ import { calcBatteryHealthSummary } from '../utils/calculations'
 import {
   Zap, Fuel, Euro, Route, Leaf, TrendingUp, BarChart3, Droplets, Battery, Trophy, MapPin, Navigation
 } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Legend, PieChart, Pie, Cell, AreaChart, Area
@@ -27,17 +28,21 @@ import {
 const COLORS_EL = '#22d3ee'
 const COLORS_FU = '#fb923c'
 const COLORS_CO = '#8b5cf6'
-const GRID_COLOR = '#1b2438'
-const TICK_COLOR = '#475569'
 
+// Tooltip usa inline styles que sí soportan CSS vars → funciona en light/dark mode
 const TOOLTIP = {
-  contentStyle: { background: '#141c2e', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '12px', color: '#e2e8f0', fontSize: 12 },
-  itemStyle: { color: '#94a3b8' },
-  cursor: { fill: 'rgba(255,255,255,0.04)' },
+  contentStyle: { background: 'var(--j-card)', border: '1px solid var(--j-border-strong)', borderRadius: '12px', color: 'var(--j-text-primary)', fontSize: 12 },
+  itemStyle: { color: 'var(--j-text-secondary)' },
+  cursor: { fill: 'rgba(128,128,128,0.06)' },
 }
 
 export default function Statistics() {
   const { data } = useData()
+  const { theme } = useTheme()
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const GRID_COLOR = theme === 'light' ? '#d4dce9' : '#1b2438'
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const TICK_COLOR = theme === 'light' ? '#3d5068' : '#475569'
   const { electricCharges, fuelRefuels } = data
 
   const elStats = calcElectricStats(electricCharges)
@@ -272,12 +277,12 @@ export default function Statistics() {
               </div>
               <div>
                 <p className="text-xs text-jaecoo-electric/60">Dinero real pagado</p>
-                <p className="text-2xl font-bold text-emerald-400">{formatCurrency(totalCash)}</p>
+                <p className="text-2xl font-bold text-jaecoo-success">{formatCurrency(totalCash)}</p>
               </div>
               {withWaylet.length > 0 && <>
                 <div>
                   <p className="text-xs text-jaecoo-electric/60">Retorno Waylet acumulado</p>
-                  <p className="text-2xl font-bold text-emerald-400">+{formatCurrency(totalWayletReturn)}</p>
+                  <p className="text-2xl font-bold text-jaecoo-success">+{formatCurrency(totalWayletReturn)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-jaecoo-electric/60">Tarifa media €/kWh</p>
@@ -285,11 +290,11 @@ export default function Statistics() {
                 </div>
                 <div>
                   <p className="text-xs text-jaecoo-electric/60">Precio efectivo €/kWh</p>
-                  <p className="text-2xl font-bold text-emerald-400">{formatNumber(avgEffectivePerKWh, 4)}</p>
+                  <p className="text-2xl font-bold text-jaecoo-success">{formatNumber(avgEffectivePerKWh, 4)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-jaecoo-electric/60">Ahorro real Waylet</p>
-                  <p className="text-2xl font-bold text-emerald-400">+{formatCurrency(totalWayletUsed)}</p>
+                  <p className="text-2xl font-bold text-jaecoo-success">+{formatCurrency(totalWayletUsed)}</p>
                 </div>
               </>}
             </div>
@@ -331,14 +336,14 @@ export default function Statistics() {
               {modeStats.map(s => {
                 const isCheapest = cheapest && s.mode === cheapest.mode && s.combinedCostPerKm > 0
                 return (
-                  <div key={s.mode} className={`rounded-xl border p-4 ${isCheapest ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
+                  <div key={s.mode} className={`rounded-xl border p-4 ${isCheapest ? 'bg-jaecoo-success-dim border-jaecoo-success/30' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl leading-none">{s.icon}</span>
                         <span className="font-semibold text-jaecoo-primary text-sm">{s.label}</span>
                       </div>
                       {isCheapest && (
-                        <span className="text-[10px] font-bold bg-emerald-500 text-white px-2 py-0.5 rounded-full">+ eficiente</span>
+                        <span className="text-[10px] font-bold bg-jaecoo-success text-white px-2 py-0.5 rounded-full">+ eficiente</span>
                       )}
                     </div>
 
@@ -390,7 +395,7 @@ export default function Statistics() {
                       <div className="mt-3 pt-2 border-t border-jaecoo-border">
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-jaecoo-muted font-medium">Coste combinado/km</span>
-                          <span className={`text-sm font-bold ${isCheapest ? 'text-emerald-400' : 'text-jaecoo-primary'}`}>
+                          <span className={`text-sm font-bold ${isCheapest ? 'text-jaecoo-success' : 'text-jaecoo-primary'}`}>
                             {formatNumber(s.combinedCostPerKm, 4)} €
                           </span>
                         </div>
@@ -415,9 +420,9 @@ export default function Statistics() {
             <div className="space-y-2">
               {chargingRanking.map((s, i) => (
                 <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border
-                  ${i === 0 ? 'bg-emerald-500/10 border-emerald-500/30' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
+                  ${i === 0 ? 'bg-jaecoo-success-dim border-jaecoo-success/30' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
                   <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                    ${i === 0 ? 'bg-emerald-500 text-white' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-jaecoo-danger text-white' : 'bg-jaecoo-border-strong text-jaecoo-secondary'}`}>
+                    ${i === 0 ? 'bg-jaecoo-success text-white' : i === chargingRanking.length - 1 && chargingRanking.length > 1 ? 'bg-jaecoo-danger text-white' : 'bg-jaecoo-border-strong text-jaecoo-secondary'}`}>
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -446,9 +451,9 @@ export default function Statistics() {
             <div className="space-y-2">
               {fuelRanking.map((s, i) => (
                 <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border
-                  ${i === 0 ? 'bg-emerald-500/10 border-emerald-500/30' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
+                  ${i === 0 ? 'bg-jaecoo-success-dim border-jaecoo-success/30' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-jaecoo-danger/10 border-jaecoo-danger/20' : 'bg-jaecoo-elevated border-jaecoo-border'}`}>
                   <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                    ${i === 0 ? 'bg-emerald-500 text-white' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-jaecoo-danger text-white' : 'bg-jaecoo-border-strong text-jaecoo-secondary'}`}>
+                    ${i === 0 ? 'bg-jaecoo-success text-white' : i === fuelRanking.length - 1 && fuelRanking.length > 1 ? 'bg-jaecoo-danger text-white' : 'bg-jaecoo-border-strong text-jaecoo-secondary'}`}>
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -529,12 +534,12 @@ function ChargeScoreCard({ charges }: { charges: import('../types').ElectricChar
   if (summary.scoredCount === 0) return null
 
   const tiers = [
-    { label: 'Óptima',  color: 'text-emerald-400', bar: 'bg-emerald-500', count: summary.records.filter(r => r.label === 'Óptima').length },
+    { label: 'Óptima',  color: 'text-jaecoo-success',  bar: 'bg-jaecoo-success',  count: summary.records.filter(r => r.label === 'Óptima').length },
     { label: 'Buena',   color: 'text-jaecoo-electric', bar: 'bg-jaecoo-electric', count: summary.records.filter(r => r.label === 'Buena').length },
     { label: 'Regular', color: 'text-jaecoo-fuel',     bar: 'bg-jaecoo-fuel',     count: summary.records.filter(r => r.label === 'Regular').length },
-    { label: 'Baja',    color: 'text-rose-400',        bar: 'bg-rose-500',        count: summary.records.filter(r => r.label === 'Baja').length },
+    { label: 'Baja',    color: 'text-jaecoo-danger',   bar: 'bg-jaecoo-danger',   count: summary.records.filter(r => r.label === 'Baja').length },
   ]
-  const scoreColor = summary.overall >= 80 ? 'text-emerald-400' : summary.overall >= 60 ? 'text-jaecoo-electric' : summary.overall >= 35 ? 'text-jaecoo-fuel' : 'text-rose-400'
+  const scoreColor = summary.overall >= 80 ? 'text-jaecoo-success' : summary.overall >= 60 ? 'text-jaecoo-electric' : summary.overall >= 35 ? 'text-jaecoo-fuel' : 'text-jaecoo-danger'
 
   return (
     <div id="bateria" className="scroll-mt-28 bg-jaecoo-card border border-jaecoo-border rounded-2xl p-5">

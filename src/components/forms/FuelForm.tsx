@@ -125,24 +125,24 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Fecha" error={errors.date}>
+        <Field label="Fecha" error={errors.date} required>
           <input type="date" value={f.date} onChange={e => set('date', e.target.value)} className={inp(errors.date, 'orange')} />
         </Field>
-        <Field label="Litros repostados" error={errors.liters}>
+        <Field label="Litros repostados" error={errors.liters} required>
           <input type="number" step="0.01" min="0" placeholder="ej. 35,5" value={f.liters} onChange={e => set('liters', e.target.value)} className={inp(errors.liters, 'orange')} />
         </Field>
         <Field label="Gasolina en depósito (L)">
           <input type="number" step="0.01" min="0" max="60" placeholder="ej. 10" value={f.litersInTank} onChange={e => set('litersInTank', e.target.value)} className={inp(undefined, 'orange')} />
         </Field>
-        <Field label="Precio total (€)" error={errors.totalPrice}>
+        <Field label="Precio total (€)" error={errors.totalPrice} required>
           <input type="number" step="0.01" min="0" placeholder="ej. 58,40" value={f.totalPrice} onChange={e => set('totalPrice', e.target.value)} className={inp(errors.totalPrice, 'orange')} />
         </Field>
-        <Field label="€/litro" error={errors.pricePerLiter}>
+        <Field label="€/litro" error={errors.pricePerLiter} required>
           <input type="number" step="0.001" min="0" placeholder="ej. 1,645" value={f.pricePerLiter} onChange={e => set('pricePerLiter', e.target.value)} className={inp(errors.pricePerLiter, 'orange')} />
         </Field>
       </div>
 
-      <Field label="Odómetro (km en el momento del repostaje)" error={errors.odometer}>
+      <Field label="Odómetro (km en el momento del repostaje)" error={errors.odometer} required>
         <input type="number" min="0" placeholder="ej. 5420" value={f.odometer} onChange={e => set('odometer', e.target.value)} className={inp(errors.odometer, 'orange')} />
       </Field>
 
@@ -173,10 +173,13 @@ export default function FuelForm({ initial, onSubmit, onCancel, isSubmitting }: 
   )
 }
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-jaecoo-muted">{label}</label>
+      <label className="text-xs font-medium text-jaecoo-muted">
+        {label}
+        {required && <span className="ml-1 text-jaecoo-danger font-bold" aria-hidden>*</span>}
+      </label>
       {children}
       {error && <p className="text-xs text-jaecoo-danger">{error}</p>}
     </div>

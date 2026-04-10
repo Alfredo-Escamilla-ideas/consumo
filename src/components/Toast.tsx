@@ -14,7 +14,7 @@ interface ToastProps {
 
 export function Toast({ toast, onDismiss }: ToastProps) {
   useEffect(() => {
-    const timer = setTimeout(() => onDismiss(toast.id), 3500)
+    const timer = setTimeout(() => onDismiss(toast.id), 5000)
     return () => clearTimeout(timer)
   }, [toast.id, onDismiss])
 
@@ -26,11 +26,11 @@ export function Toast({ toast, onDismiss }: ToastProps) {
       text-sm font-medium max-w-xs w-full pointer-events-auto
       bg-jaecoo-card animate-fade-in
       ${isSuccess
-        ? 'border-emerald-500/30 text-emerald-400'
+        ? 'border-jaecoo-success/30 text-jaecoo-success'
         : 'border-jaecoo-danger/30 text-jaecoo-danger'}
     `}>
       {isSuccess
-        ? <CheckCircle2 size={16} className="shrink-0 text-emerald-400" />
+        ? <CheckCircle2 size={16} className="shrink-0 text-jaecoo-success" />
         : <XCircle size={16} className="shrink-0 text-jaecoo-danger" />
       }
       <span className="flex-1 text-jaecoo-primary">{toast.message}</span>

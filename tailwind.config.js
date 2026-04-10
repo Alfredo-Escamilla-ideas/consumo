@@ -42,12 +42,15 @@ export default {
           // Dim backgrounds — CSS vars (rgba precalculados, sin modificador)
           'electric-dim':  'var(--j-electric-dim)',
           'fuel-dim':      'var(--j-fuel-dim)',
+          'success-dim':   'var(--j-success-dim)',
+          'warning-dim':   'var(--j-warning-dim)',
 
           // Acentos — RGB vars (soportan /20, /10 y cambian en light mode)
           electric:        'rgb(var(--j-electric-rgb) / <alpha-value>)',
           fuel:            'rgb(var(--j-fuel-rgb) / <alpha-value>)',
           accent:          'rgb(var(--j-accent-rgb) / <alpha-value>)',
           success:         'rgb(var(--j-success-rgb) / <alpha-value>)',
+          warning:         'rgb(var(--j-warning-rgb) / <alpha-value>)',
           danger:          'rgb(var(--j-danger-rgb) / <alpha-value>)',
         },
       },
